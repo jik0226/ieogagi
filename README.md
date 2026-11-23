@@ -82,7 +82,7 @@ make security                        # 보안 점검
 | 정인겸 [@jik0226](https://github.com/jik0226) | PM·백엔드 | 기획, 백엔드·프론트엔드 개발, 보안 설계·점검, 결선 질의응답 |
 | 김하은 [@khelove](https://github.com/khelove) | 프론트엔드 | ✏️ 디자인 테마로 화면 수정, 디자인 감수, 포스터 |
 | 이채린 [@Chae102](https://github.com/Chae102) | 백엔드 보안 테스트 | ✏️ 공격 시나리오 15개로 API 점검(뚫린 곳 0건) |
-| 김주환 [@emilk1031-crypto](https://github.com/emilk1031-crypto) | 발표·기획 지원 | ✏️ 현장 설문·인터뷰, 결선 발표 |
+| 김주환 [@emilk1031-crypto](https://github.com/emilk1031-crypto) | 발표·기획 지원 |  현장 설문·인터뷰, 결선 발표 |
 
 1라운드 [개발기획서](docs/02_개발기획서_본문.md)의 역할 표기는 계획 단계 기준이다.
 
