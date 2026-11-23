@@ -1,0 +1,168 @@
+/* ---------- Forms ---------- */
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.field label,
+.field__label,
+.field legend {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* A card title inside a form is set off by a hairline; spacing comes from
+   the form grid gap. */
+.form > h2:first-child,
+.form > h3:first-child {
+  margin: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--font-size-lg);
+}
+
+/* 16px text keeps phone browsers from zooming in on focus. */
+.field input[type="text"],
+.field input[type="password"],
+.field input[type="date"],
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  transition: border-color var(--transition-fast);
+}
+
+.field:not(.field--invalid) input:hover:not(:disabled),
+.field:not(.field--invalid) select:hover:not(:disabled),
+.field:not(.field--invalid) textarea:hover:not(:disabled) {
+  border-color: var(--color-text);
+}
+
+.field select {
+  cursor: pointer;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.field textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.field--invalid input,
+.field--invalid select,
+.field--invalid textarea {
+  border-color: var(--color-danger);
+  border-width: 2px;
+}
+
+.field__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.field__hint,
+.field__counter {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.field__counter {
+  flex: none;
+  text-align: right;
+}
+
+.field__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+/* Inside a checkbox field the error sits under the box, not the label. */
+.field label.checkbox ~ .field__error,
+.field label.checkbox ~ .field__hint {
+  padding-left: calc(22px + var(--space-3));
+}
+
+/* ---------- Checkbox and radio rows (44px touch rows) ---------- */
+.field label.checkbox,
+.field label.radio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-2) 0;
+  font-weight: 400;
+}
+
+.checkbox input,
+.radio input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--color-primary);
+}
+
+fieldset.field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.form-actions--end {
+  justify-content: flex-end;
+}
+
+/* Why a button is disabled is always written down next to it. */
+.form-actions__reason {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 767px) {
+  .form-actions .btn {
+    flex: 1 1 auto;
+  }
+}

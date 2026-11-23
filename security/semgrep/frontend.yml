@@ -1,0 +1,254 @@
+# Custom Semgrep rules for Ieogagi: React/JavaScript frontend family (frontend/src).
+# KISA categories: input validation and representation (XSS, code insertion, open redirect),
+# security functions (browser storage, weak random, postMessage, hardcoded endpoints),
+# encapsulation (leftover debug code), error handling (empty catch).
+# Rules: DOM XSS sinks, dynamic code execution, debug code, browser storage, open redirect,
+# Math.random, postMessage wildcard origin, hardcoded absolute URL or IPv4 literals,
+# empty catch block or .catch handler.
+# The hardcoded-endpoint rule is limited to frontend/src/** on purpose: the dev-only proxy
+# default in frontend/vite.config.js is read by Node at dev time and is not shipped in the build.
+# Tests: tests/frontend.jsx (semgrep --test ignores the paths filter, so the test still runs).
+rules:
+  - id: ieogagi-fe-dom-xss-sink
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [크로스사이트 스크립트] HTML 문자열을 DOM에 그대로 넣는 API(dangerouslySetInnerHTML, innerHTML/outerHTML 대입,
+      insertAdjacentHTML, document.write, createContextualFragment, iframe srcDoc/srcdoc)를 쓰지 마세요.
+      서버 데이터는 JSX 표현식이나 textContent 로만 화면에 표시하세요.
+      / Do not insert HTML strings into the DOM (dangerouslySetInnerHTML, assigning innerHTML or outerHTML,
+      insertAdjacentHTML, document.write, createContextualFragment, iframe srcDoc or srcdoc).
+      Render server data only through JSX expressions or textContent.
+    metadata:
+      kisa-category: 입력데이터 검증 및 표현
+      kisa-item: 크로스사이트 스크립트
+      cwe:
+        - "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      confidence: HIGH
+    pattern-either:
+      - pattern: <$T ... dangerouslySetInnerHTML=... />
+      - pattern: $X.innerHTML = $V
+      - pattern: $X.innerHTML += $V
+      - pattern: $X.outerHTML = $V
+      - pattern: $X.insertAdjacentHTML(...)
+      - pattern: document.write(...)
+      - pattern: document.writeln(...)
+      - pattern: $RANGE.createContextualFragment(...)
+      # An iframe srcdoc is parsed as a full HTML document in the page's own origin context.
+      - pattern: <iframe ... srcDoc=... />
+      - pattern: $X.srcdoc = $V
+
+  - id: ieogagi-fe-dynamic-code
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [코드 삽입] eval, Function 생성자, 문자열을 넘기는 setTimeout/setInterval 을 쓰지 마세요.
+      문자열을 코드로 실행하지 말고 함수 값을 넘기세요.
+      / Do not use eval, the Function constructor, or setTimeout/setInterval with a string argument.
+      Never execute strings as code; pass a function value instead.
+    metadata:
+      kisa-category: 입력데이터 검증 및 표현
+      kisa-item: 코드 삽입
+      cwe:
+        - "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')"
+      confidence: HIGH
+    pattern-either:
+      - pattern: eval(...)
+      # Any receiver (window, globalThis, self, frame.contentWindow, ...), dot or bracket access.
+      - pattern: $W.eval(...)
+      - pattern: $W["eval"](...)
+      - pattern: new Function(...)
+      - pattern: Function(...)
+      - pattern: setTimeout("...", ...)
+      - pattern: setTimeout(`...`, ...)
+      - pattern: setInterval("...", ...)
+      - pattern: setInterval(`...`, ...)
+      - pattern: $W.setTimeout("...", ...)
+      - pattern: $W.setTimeout(`...`, ...)
+      - pattern: $W.setInterval("...", ...)
+      - pattern: $W.setInterval(`...`, ...)
+
+  - id: ieogagi-fe-debug-code
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [제거되지 않고 남은 디버그 코드] console 출력, alert/confirm/prompt 대화상자, debugger 문을 남기지 마세요.
+      브라우저 콘솔은 사용자에게 그대로 보입니다. 확인 창은 앱의 Dialog 컴포넌트를 쓰세요.
+      / Do not leave console output, alert/confirm/prompt dialogs or debugger statements in the code.
+      The browser console is visible to every user. Use the app's Dialog component for confirmations.
+    metadata:
+      kisa-category: 캡슐화
+      kisa-item: 제거되지 않고 남은 디버그 코드
+      cwe:
+        - "CWE-489: Active Debug Code"
+      confidence: HIGH
+    pattern-either:
+      - pattern: console.$M(...)
+      - pattern: window.console.$M(...)
+      - pattern: alert(...)
+      - pattern: confirm(...)
+      - pattern: prompt(...)
+      - pattern: window.alert(...)
+      - pattern: window.confirm(...)
+      - pattern: window.prompt(...)
+      - pattern: debugger;
+
+  # KISA item choice: the project checklist (item 29) maps browser storage to
+  # "cookie persisted on the user's disk"; "unencrypted sensitive information" is the secondary fit.
+  # The session must live only in the HttpOnly cookie, so any script-side storage access is flagged.
+  - id: ieogagi-fe-browser-storage
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [사용자 하드디스크에 저장되는 쿠키를 통한 정보노출] localStorage, sessionStorage, IndexedDB, document.cookie 를 쓰지 마세요.
+      세션은 HttpOnly 쿠키에만 두고, 화면 상태는 React state 나 URL 로만 유지하세요.
+      / Do not use localStorage, sessionStorage, IndexedDB or document.cookie.
+      Keep the session only in the HttpOnly cookie and keep UI state in React state or the URL.
+    metadata:
+      kisa-category: 보안기능
+      kisa-item: 사용자 하드디스크에 저장되는 쿠키를 통한 정보노출
+      cwe:
+        - "CWE-922: Insecure Storage of Sensitive Information"
+        - "CWE-539: Use of Persistent Cookies Containing Sensitive Information"
+      confidence: HIGH
+    pattern-either:
+      - pattern: localStorage
+      - pattern: sessionStorage
+      - pattern: window.localStorage
+      - pattern: window.sessionStorage
+      # Any use of indexedDB is flagged (open, deleteDatabase, databases, or an alias such as "const db = indexedDB").
+      - pattern: indexedDB
+      - pattern: window.indexedDB
+      - pattern: document.cookie
+
+  - id: ieogagi-fe-open-redirect
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [신뢰되지 않는 URL 주소로 자동접속 연결] 이동 대상이 고정된 앱 내부 경로가 아니면 location 대입, assign, replace, window.open 을 쓰지 마세요.
+      화면 이동은 라우터(navigate)로 하고, 외부 입력으로 이동 주소를 만들지 마세요.
+      / Do not use location assignment, assign, replace or window.open unless the target is a fixed in-app path.
+      Navigate with the router and never build the destination from external input.
+    metadata:
+      kisa-category: 입력데이터 검증 및 표현
+      kisa-item: 신뢰되지 않는 URL 주소로 자동접속 연결
+      cwe:
+        - "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')"
+      confidence: MEDIUM
+    patterns:
+      - pattern-either:
+          # Bare "location" plus any receiver: window, document, top, self, parent, frame.contentWindow, ...
+          # Statement form: it also matches "const location = ..." declarations, removed by the pattern-nots below.
+          - pattern: location = $X;
+          - pattern: location.href = $X
+          - pattern: location.assign($X)
+          - pattern: location.replace($X)
+          - pattern: $W.location = $X
+          - pattern: $W.location.href = $X
+          - pattern: $W.location.assign($X)
+          - pattern: $W.location.replace($X)
+          - pattern: window.open($X, ...)
+      # A local declaration named "location" (for example const location = useLocation()) is not an assignment.
+      - pattern-not: const location = $X;
+      - pattern-not: let location = $X;
+      - pattern-not: var location = $X;
+      # A plain string literal that starts with a single "/" is a fixed same-origin path.
+      - pattern-not: location = "=~/^[/](?![/\\])/";
+      - pattern-not: location.href = "=~/^[/](?![/\\])/"
+      - pattern-not: location.assign("=~/^[/](?![/\\])/")
+      - pattern-not: location.replace("=~/^[/](?![/\\])/")
+      - pattern-not: $W.location = "=~/^[/](?![/\\])/"
+      - pattern-not: $W.location.href = "=~/^[/](?![/\\])/"
+      - pattern-not: $W.location.assign("=~/^[/](?![/\\])/")
+      - pattern-not: $W.location.replace("=~/^[/](?![/\\])/")
+      - pattern-not: window.open("=~/^[/](?![/\\])/", ...)
+
+  - id: ieogagi-fe-weak-random
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [적절하지 않은 난수 값 사용] Math.random 을 쓰지 마세요. 예측 가능한 값입니다.
+      식별자·토큰이 필요하면 crypto.getRandomValues 나 crypto.randomUUID 를 쓰고, 보안 값은 서버가 만들게 하세요.
+      / Do not use Math.random; its output is predictable.
+      Use crypto.getRandomValues or crypto.randomUUID when an identifier is needed, and let the server issue security values.
+    metadata:
+      kisa-category: 보안기능
+      kisa-item: 적절하지 않은 난수 값 사용
+      cwe:
+        - "CWE-330: Use of Insufficiently Random Values"
+      confidence: MEDIUM
+    pattern: Math.random()
+
+  # KISA item choice: no item names the wildcard target origin directly, so the closest
+  # security-function item (improper authorization of who may receive the data) is used.
+  - id: ieogagi-fe-postmessage-wildcard
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [부적절한 인가] postMessage 의 대상 출처(targetOrigin)를 와일드카드로 두지 마세요.
+      받을 창의 출처를 정확히 지정해 다른 출처가 메시지를 가로채지 못하게 하세요.
+      / Do not use a wildcard target origin with postMessage.
+      Name the exact origin of the receiving window so that no other origin can read the message.
+    metadata:
+      kisa-category: 보안기능
+      kisa-item: 부적절한 인가
+      cwe:
+        - "CWE-345: Insufficient Verification of Data Authenticity"
+      confidence: HIGH
+    pattern-either:
+      - pattern: $W.postMessage($MSG, "*", ...)
+      - pattern: postMessage($MSG, "*", ...)
+      - pattern: '$W.postMessage($MSG, {..., targetOrigin: "*", ...}, ...)'
+
+  - id: ieogagi-fe-hardcoded-endpoint
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [하드코드된 중요정보] 코드에 절대 주소(http/https URL)나 IPv4 주소 문자열을 넣지 마세요.
+      API 는 같은 출처의 상대 경로로 호출하고, 환경별 주소는 배포 설정에서 주입하세요.
+      / Do not hard-code absolute http/https URLs or IPv4 addresses in string literals.
+      Call the API through same-origin relative paths and inject per-environment addresses from deployment settings.
+    metadata:
+      kisa-category: 보안기능
+      kisa-item: 하드코드된 중요정보
+      cwe:
+        - "CWE-798: Use of Hard-coded Credentials"
+      confidence: MEDIUM
+    paths:
+      include:
+        - "/frontend/src/**"
+    # Report only the literal itself, not every variable that holds it (constant propagation).
+    options:
+      constant_propagation: false
+    patterns:
+      - pattern: '"$S"'
+      # XML namespace URIs (for example the SVG xmlns value) are identifiers, not endpoints.
+      - metavariable-regex:
+          metavariable: $S
+          regex: '^(?!https?://(?:www\.w3\.org|schemas\.xmlsoap\.org|ns\.adobe\.com|purl\.org|xmlns\.com)/)(?:https?://[^\s/:?#]+|(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?::\d+)?(?:[/?#].*)?$)'
+
+  # Added after the contest's round 2 static-analysis diagnosis (04.02, InviteForm.jsx): a catch block that
+  # holds only a comment is still empty, and Semgrep ignores comments, so it is caught here.
+  - id: ieogagi-fe-empty-catch
+    languages: [javascript]
+    severity: ERROR
+    message: >-
+      [오류 상황 대응 부재] catch 블록이나 .catch 처리기가 비어 있습니다(주석만 있어도 빈 블록입니다). 오류를 삼키지 마세요.
+      사용자에게 고정 문구로 알리거나 대체 동작을 하고, 예외 메시지나 스택은 화면에 보이지 마세요.
+      / The catch block or .catch handler is empty (a comment alone still counts as empty). Do not swallow the error.
+      Tell the user with a fixed message or fall back explicitly, and never show the exception text or stack.
+    metadata:
+      kisa-category: 에러처리
+      kisa-item: 오류 상황 대응 부재
+      cwe:
+        - "CWE-390: Detection of Error Condition Without Action"
+      confidence: HIGH
+    pattern-either:
+      - pattern: try { ... } catch ($E) {}
+      - pattern: try { ... } catch {}
+      - pattern: try { ... } catch ($E) {} finally { ... }
+      - pattern: try { ... } catch {} finally { ... }
+      - pattern: $P.catch(() => {})
+      - pattern: $P.catch(($E) => {})
+      - pattern: $P.catch(function () {})
+      - pattern: $P.catch(function ($E) {})

@@ -1,0 +1,127 @@
+# Custom Semgrep rules for Ieogagi: injection family.
+# KISA category: input data validation and representation.
+# Rules: eval/exec, raw SQL string building (direct or via a variable), shell execution, open redirect.
+# Tests: tests/injection.py (run: backend/.venv/bin/semgrep --metrics=off --test security/semgrep/)
+rules:
+  - id: ieogagi-no-eval-exec
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [코드 삽입] eval/exec/compile(..., "exec")/__import__ 에 리터럴이 아닌 값을 넘기지 마세요.
+      json 파싱, ast.literal_eval, 명시적 매핑(allow-list)으로 대체하세요.
+      / Do not pass non-literal values to eval/exec/compile(..., "exec")/__import__.
+      Use json parsing, ast.literal_eval or an explicit allow-list mapping instead.
+    metadata:
+      kisa-category: 입력데이터 검증 및 표현
+      kisa-item: 코드 삽입
+      cwe:
+        - "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')"
+      confidence: HIGH
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: exec(...)
+          - pattern: __import__(...)
+          - pattern: compile($SRC, ..., "exec", ...)
+          - pattern: compile($SRC, ..., mode="exec", ...)
+      - pattern-not: eval("...")
+      - pattern-not: exec("...")
+      - pattern-not: __import__("...")
+      - pattern-not: compile("...", ...)
+
+  # Taint mode: a SQL string built dynamically (f-string, %, .format, +, "...".join) is a source and
+  # the first argument of text()/execute()/... is a sink. It covers the direct form and the variable form
+  # (q = f"...{x}..."; text(q)), including += building, reassignment and branches.
+  # taint_assume_safe_functions keeps ORM calls (select(...).where(col == "a" + b)) from carrying taint.
+  - id: ieogagi-no-raw-sql-format
+    languages: [python]
+    severity: ERROR
+    mode: taint
+    options:
+      taint_assume_safe_functions: true
+    message: >-
+      [SQL 삽입] SQL 문자열을 f-string, %, .format(), +, "...".join() 으로 조립해 text()/execute() 에 넘기지 마세요.
+      변수에 먼저 조립해 두었다가 넘기는 경우도 같습니다.
+      SQLAlchemy ORM 또는 text("... :name") 와 바인딩 파라미터를 사용하세요.
+      / Do not build SQL with f-strings, %, .format(), + or "...".join() and pass it to text()/execute(),
+      directly or through a variable.
+      Use the SQLAlchemy ORM or text("... :name") with bound parameters.
+    metadata:
+      kisa-category: 입력데이터 검증 및 표현
+      kisa-item: SQL 삽입
+      cwe:
+        - "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      confidence: HIGH
+    pattern-sources:
+      - pattern-either:
+          - pattern: f"...{$X}..."
+          - pattern: '"..." % $X'
+          - pattern: '"...".format(...)'
+          - pattern: '"...".join(...)'
+          - patterns:
+              - pattern-either:
+                  - pattern: '"..." + $X'
+                  - pattern: '$X + "..."'
+              # Two literals joined by + are still a constant.
+              - pattern-not: '"..." + "..."'
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: text($Q)
+              - pattern: sqlalchemy.text($Q)
+          - focus-metavariable: $Q
+      # execute(text(...)) is left to the text() sink above: an outer sink hides the inner one in taint mode.
+      - patterns:
+          - pattern-either:
+              - pattern: $CONN.execute($Q, ...)
+              - pattern: $CONN.executemany($Q, ...)
+              - pattern: $CONN.exec_driver_sql($Q, ...)
+              - pattern: $CONN.executescript($Q)
+          - pattern-not: $CONN.$M(text(...), ...)
+          - pattern-not: $CONN.$M(sqlalchemy.text(...), ...)
+          - focus-metavariable: $Q
+
+  - id: ieogagi-no-shell
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [운영체제 명령어 삽입] shell=True, os.system, os.popen 을 사용하지 마세요.
+      외부 프로세스가 꼭 필요하면 인자 리스트로 shell 없이 호출하세요 (이어가기는 쉘 호출이 필요 없는 설계입니다).
+      / Do not use shell=True, os.system or os.popen.
+      If a subprocess is unavoidable, pass an argument list without a shell.
+    metadata:
+      kisa-category: 입력데이터 검증 및 표현
+      kisa-item: 운영체제 명령어 삽입
+      cwe:
+        - "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+      confidence: HIGH
+    pattern-either:
+      - pattern: subprocess.$FUNC(..., shell=True, ...)
+      - pattern: os.system(...)
+      - pattern: os.popen(...)
+      - pattern: subprocess.getoutput(...)
+      - pattern: subprocess.getstatusoutput(...)
+      - pattern: asyncio.create_subprocess_shell(...)
+
+  - id: ieogagi-no-ssrf-redirect
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [신뢰되지 않는 URL 주소로 자동접속 연결] RedirectResponse 에 리터럴이 아닌 URL 을 넘기지 마세요.
+      고정 경로를 쓰거나 허용 목록(allow-list)에 있는 값만 선택해 이동시키세요.
+      / Do not pass a non-literal URL to RedirectResponse.
+      Redirect to a fixed path or to a value picked from an allow-list.
+    metadata:
+      kisa-category: 입력데이터 검증 및 표현
+      kisa-item: 신뢰되지 않는 URL 주소로 자동접속 연결
+      cwe:
+        - "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')"
+      confidence: MEDIUM
+    patterns:
+      - pattern-either:
+          - pattern: RedirectResponse($URL, ...)
+          - pattern: RedirectResponse(..., url=$URL, ...)
+          - pattern: starlette.responses.RedirectResponse($URL, ...)
+          - pattern: fastapi.responses.RedirectResponse($URL, ...)
+      - pattern-not: RedirectResponse("...", ...)
+      - pattern-not: RedirectResponse(..., url="...", ...)

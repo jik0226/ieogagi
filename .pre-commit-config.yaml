@@ -1,0 +1,53 @@
+# Pre-commit hooks for Ieogagi (install once with: backend/.venv/bin/pre-commit install).
+# Every `rev` is pinned to an exact release tag. Bump deliberately with:
+#   backend/.venv/bin/pre-commit autoupdate --freeze   (then review the diff)
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        # The contest PDF in docs/ is ~1 MB, so raise the 500 KB default.
+        args: ["--maxkb=2048"]
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        # Keep the two trailing spaces that Markdown uses as a hard line break.
+        args: ["--markdown-linebreak-ext=md"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
+    hooks:
+      # ruff-check (id "ruff" is a legacy alias). No `--config` flag on purpose: ruff then
+      # auto-discovers backend/pyproject.toml per file, exactly like `make lint` and CI do.
+      # Passing `--config backend/pyproject.toml` from the repo root resolves `src` against the
+      # root and silently changes import-sorting results.
+      - id: ruff-check
+        files: ^backend/
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.9.4
+    hooks:
+      - id: bandit
+        args: ["-c", "backend/pyproject.toml"]
+        files: ^backend/app/
+        additional_dependencies: ["bandit[toml]"]
+
+  - repo: local
+    hooks:
+      # Custom Semgrep rules (security/semgrep/*.yml). Uses the project venv's semgrep, so run
+      # `make setup` first. Fully offline: no registry rules are fetched here.
+      - id: semgrep-custom
+        name: semgrep (Ieogagi custom rules)
+        entry: backend/.venv/bin/semgrep --config security/semgrep --error --metrics=off --disable-version-check
+        language: system
+        files: ^(backend/app/.*\.py|frontend/src/.*\.jsx?)$
+
+      # Frontend lint (eslint + eslint-plugin-security). Needs `npm ci` in frontend/ first.
+      - id: eslint
+        name: eslint (frontend)
+        entry: npm --prefix frontend run lint
+        language: system
+        files: ^frontend/src/
+        pass_filenames: false

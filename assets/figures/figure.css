@@ -1,0 +1,30 @@
+/* Shared styles for the proposal figures (rendered at 880px, printed ~160mm wide). */
+:root {
+  --blue: #0b2a6b; --blue-bg: #e9eef8; --blue-line: #9fb0d6;
+  --amber: #d97706; --amber-bg: #fff4e0; --amber-text: #8a4b06;
+  --green: #1f6b3a; --green-bg: #e8f5ec;
+  --border: #c5cad3; --grey-bg: #f3f4f6; --chip-bg: #f1f3f6;
+  --text: #1f2937; --muted: #4b5260;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 880px; background: #fff; }
+body {
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: var(--text);
+  font-size: 17px; line-height: 1.38; padding: 10px; word-break: keep-all;
+  overflow-wrap: anywhere; -webkit-font-smoothing: antialiased;
+}
+b { font-weight: 700; }
+code { font-family: Menlo, Consolas, monospace; font-size: 0.86em; }
+.note { font-size: 15px; color: var(--muted); }
+.box { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; background: #fff; }
+.box .t { font-weight: 700; color: var(--blue); font-size: 17px; margin-bottom: 3px; }
+.box.amber { border: 2px solid var(--amber); background: var(--amber-bg); }
+.box.amber .t { color: var(--amber-text); }
+.box.blue { border-color: var(--blue-line); background: var(--blue-bg); }
+.box.ok { border: 2px solid var(--green); background: var(--green-bg); }
+.box.ok .t { color: var(--green); }
+.down { text-align: center; color: var(--blue); font-size: 15px; font-weight: 600; line-height: 26px; }
+.gate { background: var(--blue); color: #fff; border-radius: 8px; padding: 8px 12px; }
+.gate .t { font-size: 18px; font-weight: 700; margin-bottom: 4px; text-align: center; }
+.gate .cond { font-size: 17px; line-height: 1.5; }
+.gate .cond b { color: #ffd98a; }

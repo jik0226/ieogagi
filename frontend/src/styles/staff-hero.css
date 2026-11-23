@@ -1,0 +1,105 @@
+/* ---------- Greeting block with overlapping circles ---------- */
+.staff-hero {
+  position: relative;
+  margin-bottom: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  overflow: hidden;
+  background: var(--color-peach);
+  border-radius: var(--radius-xl) var(--radius-xl) var(--radius-xl) 3rem;
+}
+
+.staff-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.staff-hero h1 {
+  margin: var(--space-1) 0;
+  font-size: 1.75rem;
+}
+
+.staff-hero__hello {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.staff-hero__where {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.staff-hero::before,
+.staff-hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Big brown ring, bottom right. */
+.staff-hero::before {
+  right: -50px;
+  bottom: -90px;
+  width: 190px;
+  height: 190px;
+  border: 30px solid var(--color-primary);
+}
+
+/* Butter disc with a sage and a white dot (box-shadow copies). */
+.staff-hero::after {
+  top: 18px;
+  right: 170px;
+  width: 54px;
+  height: 54px;
+  background: var(--color-butter);
+  box-shadow:
+    62px 26px 0 -14px var(--color-sage),
+    -40px 52px 0 -40px var(--color-surface);
+}
+
+@media (max-width: 767px) {
+  .staff-hero {
+    padding: var(--space-5);
+  }
+
+  .staff-hero::after {
+    right: 90px;
+  }
+}
+
+/* ---------- Pill tabs (segmented) ---------- */
+.page--staff .tabs {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-card);
+}
+
+.page--staff .tabs__tab {
+  margin: 0;
+  padding: var(--space-2) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+}
+
+/* Current tab: brown pill, white bold text (fill + weight, 12.5:1). */
+.page--staff .tabs__tab[aria-selected="true"] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* ---------- Cards and tables on the dashboard ---------- */
+.page--staff .card,
+.page--staff .table-wrap {
+  border-color: transparent;
+  box-shadow: var(--shadow-raised);
+}
+
+.page--staff .table thead th {
+  background: var(--color-surface-muted);
+}

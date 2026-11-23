@@ -1,0 +1,135 @@
+/* ================= Theme "따뜻한 수첩" (design review B) ================= */
+
+/* ---------- Mentor header: brown band ----------
+   White text on brown is 12.5:1. The default blue focus ring is too faint on
+   brown, so focus inside the band uses butter (10.5:1 against brown). */
+.app-header--mentor {
+  background: var(--color-primary);
+  border-bottom: 0;
+  box-shadow: none;
+  border-radius: 0 0 var(--radius-md) 2.5rem;
+}
+
+.app-header--mentor .app-header__brand,
+.app-header--mentor .app-header__brand:hover,
+.app-header--mentor .app-header__who {
+  color: var(--color-on-primary);
+}
+
+.app-header--mentor .app-header__brand::before {
+  border-color: var(--color-peach);
+}
+
+.app-header--mentor .app-header__logout {
+  border-color: var(--color-surface);
+}
+
+.app-header--mentor .app-header__error {
+  color: var(--color-butter);
+}
+
+.app-header--mentor :focus-visible {
+  outline-color: var(--color-butter);
+}
+
+/* ---------- W1: log-in and sign-up pages with corner shapes ----------
+   Two decorative discs per corner, drawn in CSS with layered radial
+   gradients (small disc on top). They sit behind the content and carry no
+   meaning. Fields are bordered boxes (4.5:1 line) with a visible label. */
+.auth-page {
+  position: relative;
+  min-height: 100dvh;
+  padding-top: 11rem;
+  padding-bottom: 7rem;
+  overflow: hidden;
+}
+
+.auth-page::before,
+.auth-page::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.auth-page::before {
+  top: -210px;
+  left: -95px;
+  width: 380px;
+  height: 380px;
+  background:
+    radial-gradient(circle 42px at 325px 282px, var(--color-primary) 41px, transparent 42px),
+    radial-gradient(circle 190px at 190px 190px, var(--color-butter) 189px, transparent 190px);
+}
+
+.auth-page::after {
+  right: -120px;
+  bottom: -258px;
+  width: 330px;
+  height: 330px;
+  background:
+    radial-gradient(circle 22px at 55px 42px, var(--color-butter) 21px, transparent 22px),
+    radial-gradient(circle 165px at 165px 165px, var(--color-primary) 164px, transparent 165px);
+}
+
+.auth-page .form.card {
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-5) 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+/* The box, border and error colour come from forms.css; only the height grows. */
+.auth-page .field input[type="text"],
+.auth-page .field input[type="password"] {
+  min-height: 3rem;
+}
+
+.auth-page > .meta {
+  text-align: center;
+}
+
+/* Log-in: the brand title above two labelled fields. */
+.login-page {
+  padding-top: 13rem;
+}
+
+.login-page .brand-block {
+  padding-top: 0;
+}
+
+.login-page .brand-block::before,
+.login-page .brand-block::after {
+  content: none;
+}
+
+.login-page .brand-block h1 {
+  font-size: 2.5rem;
+  color: var(--color-text);
+}
+
+/* Sign-up: centred title with the step (1/2, 2/2) as a butter pill. */
+.signup-page > h1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 1.75rem;
+  text-align: center;
+}
+
+.signup-page .stepper {
+  padding: 0.125rem var(--space-3);
+  background: var(--color-butter);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.signup-page .alert--success {
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-sage);
+}

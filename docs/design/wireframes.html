@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이어가기 와이어프레임</title>
+<style>
+  /* Low-fidelity wireframe style: grayscale boxes, one accent for blocked/warning states. */
+  :root { --ink:#222; --sub:#666; --line:#9a9a9a; --soft:#f2f2f2; --mid:#e3e3e3; --warn:#c0392b; --ok:#2e7d4f; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:24px; background:#fafafa; color:var(--ink);
+         font:14px/1.5 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  main { max-width:1180px; margin:0 auto; }
+  h1 { font-size:24px; margin:0 0 4px; } h2 { font-size:19px; margin:0 0 12px; }
+  h3 { font-size:15px; margin:14px 0 6px; }
+  .lead { color:var(--sub); margin:0 0 16px; }
+  section { background:#fff; border:1px solid #ddd; border-radius:10px; padding:20px; margin:0 0 24px; }
+  .row { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+  .col { flex:1 1 360px; min-width:320px; }
+  /* Device frames */
+  .phone { width:300px; border:2px solid #555; border-radius:22px; padding:14px 12px 16px; background:#fff; flex:none; }
+  .phone .bar { height:6px; width:60px; background:#bbb; border-radius:3px; margin:0 auto 10px; }
+  .desk { width:100%; max-width:1080px; border:2px solid #555; border-radius:8px; background:#fff; overflow:hidden; }
+  .desk .chrome { background:var(--mid); padding:6px 10px; font-size:12px; color:var(--sub); }
+  .desk .body { padding:14px; }
+  .cap { font-size:12px; color:var(--sub); text-align:center; margin-top:6px; }
+  /* Wireframe primitives */
+  .hdr { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--sub);
+         border-bottom:1px solid var(--mid); padding-bottom:6px; margin-bottom:10px; }
+  .title { font-weight:700; font-size:16px; margin:4px 0 8px; }
+  .muted { color:var(--sub); font-size:12px; }
+  .box { border:1px solid var(--line); border-radius:6px; padding:8px; margin:6px 0; background:#fff; }
+  .soft { background:var(--soft); }
+  .input { border:1px solid var(--line); border-radius:4px; height:30px; padding:5px 8px; color:#999; font-size:12px; margin:3px 0 8px; background:#fff; }
+  .area { height:52px; }
+  .label { font-size:12px; font-weight:600; }
+  .btn { display:inline-block; border:1px solid #444; border-radius:4px; padding:5px 10px; font-size:12px; background:#fff; margin:2px 2px 2px 0; }
+  .btn.primary { background:#444; color:#fff; } .btn.ghost { border-style:dashed; color:var(--sub); }
+  .btn.danger { border-color:var(--warn); color:var(--warn); } .btn.off { border-color:#bbb; color:#bbb; }
+  .full { display:block; text-align:center; }
+  .badge { display:inline-block; font-size:11px; border:1px solid var(--line); border-radius:10px; padding:0 7px; margin-left:4px; color:var(--sub); }
+  .badge.on { border-color:var(--ok); color:var(--ok); } .badge.warn { border-color:var(--warn); color:var(--warn); }
+  .badge.lock::before { content:"🔒 "; }
+  .card { border:1px solid var(--line); border-radius:6px; padding:8px; margin:6px 0; }
+  .card.off { color:#aaa; border-style:dashed; }
+  .rec dt { font-size:11px; color:var(--sub); } .rec dd { margin:0 0 4px; font-size:12px; }
+  .banner { border:1px solid var(--warn); color:var(--warn); border-radius:4px; padding:6px 8px; font-size:12px; margin:6px 0; }
+  .banner.info { border-color:var(--line); color:var(--sub); }
+  .tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin:8px 0 10px; }
+  .tabs span { padding:4px 10px; font-size:12px; border:1px solid var(--line); border-bottom:none; border-radius:4px 4px 0 0; color:var(--sub); }
+  .tabs span.on { background:#444; color:#fff; border-color:#444; }
+  .dialog { border:2px solid #444; border-radius:8px; padding:10px; background:#fff; box-shadow:4px 4px 0 #ccc; }
+  table.wf { width:100%; border-collapse:collapse; font-size:12px; }
+  table.wf th, table.wf td { border:1px solid var(--mid); padding:4px 6px; text-align:left; }
+  table.wf th { background:var(--soft); }
+  tr.hl td { background:#fff4f2; }
+  .skel { height:12px; background:var(--mid); border-radius:3px; margin:6px 0; }
+  /* Numbered callouts */
+  .n { display:inline-block; min-width:18px; height:18px; border-radius:9px; background:#111; color:#fff;
+       font-size:11px; line-height:18px; text-align:center; margin-right:4px; vertical-align:middle; }
+  .tabs span.on .n, .btn.primary .n { background:#fff; color:#111; }
+  /* Annotation tables */
+  table.ann { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.ann th, table.ann td { border:1px solid #ddd; padding:5px 7px; vertical-align:top; text-align:left; }
+  table.ann th { background:#f0f0f0; white-space:nowrap; }
+  table.ann td:nth-child(2) { min-width:6.5em; }
+  .role { font-size:11px; border-radius:3px; padding:0 4px; border:1px solid #888; }
+  .note { font-size:12.5px; color:var(--sub); border-left:3px solid #bbb; padding-left:8px; margin:8px 0; }
+  .grid3 { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  /* Per-screen capture: wireframes.html#W3 shows only that section (used for PNG export). */
+  body:has(section:target) section:not(:target) { display:none; }
+  body:has(section:target) .doc-only { display:none; }
+</style>
+</head>
+<body>
+<main>
+
+<div class="doc-only">
+  <h1>이어가기 — 화면 6개 와이어프레임 (저충실도)</h1>
+  <p class="lead">검토용 · 2026-10-11 · 기획서 ❷ 3절(화면 6개·F1~F10)과 <a href="../API_설계.md">API_설계.md</a>(#1~#27) 기준.
+  색·글꼴·간격은 디자인 단계(디자인 담당 감수)에서 정한다. 이 문서는 <b>무엇이 어디에 있고 어디로 이동하는지</b>만 정한다.</p>
+  <p class="note">읽는 법: <span class="n">1</span> 번호는 오른쪽(또는 아래) 표의 행 번호. 역할 표기 <span class="role">시설장</span> <span class="role">담당자</span> <span class="role">멘토</span>,
+  <span class="badge lock">시설장 전용</span>. 빨간 테두리는 차단·경고 상태. 맨 아래 <b>「확인 요청」 5문항</b>만 답해 주면 된다.</p>
+</div>
+
+<!-- ============================== FLOW ============================== -->
+<section id="flow">
+<h2>0. 화면 흐름도</h2>
+<svg viewBox="0 0 1120 600" width="100%" role="img" aria-label="이어가기 화면 흐름도"
+     font-family="-apple-system, Apple SD Gothic Neo, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#444"/></marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#c0392b"/></marker>
+  </defs>
+  <g stroke="#444" fill="#fff" stroke-width="1.5">
+    <rect x="20" y="40" width="170" height="64" rx="8"/>
+    <rect x="20" y="150" width="170" height="64" rx="8"/>
+    <rect x="250" y="95" width="120" height="64" rx="32" fill="#f2f2f2"/>
+    <rect x="430" y="20" width="190" height="64" rx="8"/>
+    <rect x="680" y="20" width="200" height="64" rx="8"/>
+    <rect x="930" y="20" width="170" height="64" rx="8"/>
+    <rect x="430" y="190" width="190" height="64" rx="8"/>
+    <rect x="680" y="190" width="200" height="64" rx="8"/>
+  </g>
+  <g stroke="#c0392b" fill="#fff4f2" stroke-width="1.5">
+    <rect x="680" y="110" width="200" height="56" rx="8"/>
+    <rect x="930" y="110" width="170" height="56" rx="8"/>
+    <rect x="250" y="250" width="120" height="50" rx="8"/>
+  </g>
+  <g text-anchor="middle" fill="#222">
+    <text x="105" y="68" font-weight="700">W1 로그인</text><text x="105" y="88" font-size="11" fill="#666">아이디·비밀번호</text>
+    <text x="105" y="178" font-weight="700">W1 초대 가입</text><text x="105" y="198" font-size="11" fill="#666">코드 확인 → 정보 입력</text>
+    <text x="310" y="122" font-weight="700">역할</text><text x="310" y="140" font-size="11" fill="#666">로그인 성공</text>
+    <text x="525" y="48" font-weight="700">W2 멘토 홈</text><text x="525" y="68" font-size="11" fill="#666">내 아동(진행 중·시작 전)</text>
+    <text x="780" y="48" font-weight="700">W3 인계 카드·기록</text><text x="780" y="68" font-size="11" fill="#666">카드 4회 + 공유 문구 + 내 기록</text>
+    <text x="1015" y="48" font-weight="700">W4 기록 쓰기·정정</text><text x="1015" y="68" font-size="11" fill="#666">세 칸 + 민감어 확인</text>
+    <text x="525" y="218" font-weight="700">W5 관리</text><text x="525" y="238" font-size="11" fill="#666">아동 · 배정 · 계정</text>
+    <text x="780" y="218" font-weight="700">W6 기록 관리·감사</text><text x="780" y="238" font-size="11" fill="#666">숨김·칸 지우기·메모 · 감사 로그</text>
+    <text x="780" y="134" font-weight="700" fill="#c0392b">403 차단 화면</text><text x="780" y="152" font-size="11" fill="#c0392b">기간 밖·회수·다른 센터</text>
+    <text x="1015" y="134" font-weight="700" fill="#c0392b">민감어 확인창</text><text x="1015" y="152" font-size="11" fill="#c0392b">수정 / 그래도 저장</text>
+    <text x="310" y="272" font-weight="700" fill="#c0392b">401 세션 만료</text><text x="310" y="289" font-size="11" fill="#c0392b">→ 로그인으로</text>
+  </g>
+  <g stroke="#444" stroke-width="1.4" fill="none" marker-end="url(#a)">
+    <path d="M105,150 V104"/> <path d="M190,72 C220,72 230,110 250,118"/>
+    <path d="M370,115 C400,90 410,60 430,55"/> <path d="M370,140 C400,170 410,210 430,220"/>
+    <path d="M620,52 H680"/> <path d="M880,52 H930"/> <path d="M930,70 C900,90 900,90 880,70"/>
+    <path d="M620,222 H680"/> <path d="M680,236 C650,250 650,250 620,236"/>
+  </g>
+  <g stroke="#c0392b" stroke-width="1.4" fill="none" stroke-dasharray="5 4" marker-end="url(#r)">
+    <path d="M780,84 V110"/> <path d="M1015,84 V110"/> <path d="M370,275 H330"/>
+  </g>
+  <g font-size="11" fill="#555">
+    <text x="112" y="132">가입 후 로그인</text><text x="384" y="70">멘토</text><text x="384" y="196">담당자·시설장</text>
+    <text x="628" y="44">아동 선택</text><text x="884" y="44">쓰기·정정</text><text x="884" y="94">저장 후</text>
+    <text x="628" y="214">탭 이동</text><text x="790" y="104" fill="#c0392b">거부 시</text><text x="1025" y="104" fill="#c0392b">422 시</text>
+    <text x="378" y="268" fill="#c0392b">어느 화면이든</text>
+  </g>
+  <!-- Core story strip -->
+  <g transform="translate(20,340)">
+    <text x="0" y="0" font-weight="700" font-size="14">핵심 흐름 — 배정 기간이 곧 열람 권한</text>
+    <g stroke="#444" stroke-width="1.5" fill="#fff">
+      <rect x="0" y="20" width="240" height="80" rx="8"/><rect x="270" y="20" width="240" height="80" rx="8"/>
+      <rect x="540" y="20" width="240" height="80" rx="8"/><rect x="810" y="20" width="270" height="80" rx="8" stroke="#c0392b" fill="#fff4f2"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="120" y="48" font-weight="700">① 전임 종료</text><text x="120" y="68" font-size="11" fill="#666">김하람 배정 07.03~09.29</text><text x="120" y="86" font-size="11" fill="#666">마지막 기록 13회(09.29)</text>
+      <text x="390" y="48" font-weight="700">② 후임 배정 (W5)</text><text x="390" y="68" font-size="11" fill="#666">이도윤 09.30~12.20</text><text x="390" y="86" font-size="11" fill="#666">담당자가 기간 설정</text>
+      <text x="660" y="48" font-weight="700">③ 인계 카드 (W3)</text><text x="660" y="68" font-size="11" fill="#666">시작일부터 10~13회 + 공유 문구</text><text x="660" y="86" font-size="11" fill="#666">첫 회차를 '표로 정리'에서 시작</text>
+      <text x="945" y="48" font-weight="700" fill="#c0392b">④ 기간 밖 차단 (403)</text><text x="945" y="68" font-size="11" fill="#c0392b">김하람: 09.30부터 별빛 기록 닫힘</text><text x="945" y="86" font-size="11" fill="#c0392b">차단은 감사 로그(W6)에 사유와 함께</text>
+    </g>
+    <g stroke="#444" stroke-width="1.5" marker-end="url(#a)"><path d="M240,60 H268"/><path d="M510,60 H538"/><path d="M780,60 H808"/></g>
+  </g>
+  <text x="20" y="490" font-size="12" fill="#666">· 멘토가 W5·W6 경로를 직접 열면 자기 홈(W2)으로 돌려보낸다. 담당자·시설장이 W2~W4 경로를 열면 W5로 돌려보낸다.</text>
+  <text x="20" y="512" font-size="12" fill="#666">· 404(없는 주소)는 「페이지를 찾을 수 없습니다 → 처음으로」. 서버 오류는 내부 정보 없이 「잠시 후 다시 시도」.</text>
+  <text x="20" y="534" font-size="12" fill="#666">· 모든 화면 상단: 센터명 · 이름(역할) · 로그아웃. 세션은 10분 동안 아무것도 안 하면 끝난다(401 → 로그인).</text>
+</svg>
+</section>
+
+<!-- ============================== W1 ============================== -->
+<section id="W1">
+<h2>W1. 로그인 · 초대 가입 <span class="role">전원</span> <span class="muted">/login, /signup · 모바일 우선</span></h2>
+<div class="row">
+  <div class="phone"><div class="bar"></div>
+    <div class="title" style="text-align:center">이어가기</div>
+    <div class="muted" style="text-align:center">지역아동센터 교육봉사 인계 수첩</div>
+    <div class="banner"><span class="n">4</span>아이디 또는 비밀번호가 올바르지 않거나, 잠시 로그인이 제한된 계정입니다.</div>
+    <div class="label"><span class="n">1</span>아이디</div><div class="input">mentor_lee</div>
+    <div class="label">비밀번호</div><div class="input">••••••••••</div>
+    <span class="btn primary full"><span class="n">2</span>로그인</span>
+    <p class="muted" style="text-align:center"><span class="n">3</span>초대 코드가 있나요? <u>초대 코드로 가입하기</u></p>
+    <div class="cap">로그인 (실패 문구 표시 상태)</div>
+  </div>
+  <div class="phone"><div class="bar"></div>
+    <div class="title">초대 코드로 가입 <span class="muted">1/2</span></div>
+    <div class="label"><span class="n">5</span>초대 코드</div><div class="input">센터에서 받은 코드</div>
+    <span class="btn primary full">코드 확인</span>
+    <div class="box soft"><span class="n">6</span><b>햇살지역아동센터</b> · 멘토로 초대되었습니다<br><span class="muted">코드 유효: 10/14 16:00까지</span></div>
+    <span class="btn full">다음</span>
+    <div class="banner">초대 코드가 올바르지 않거나 만료되었습니다.</div>
+    <div class="cap">가입 1단계 (확인 성공 / 실패 예)</div>
+  </div>
+  <div class="phone"><div class="bar"></div>
+    <div class="title">초대 코드로 가입 <span class="muted">2/2</span></div>
+    <div class="label"><span class="n">7</span>아이디</div><div class="input">영문 소문자·숫자·_ 4~32자</div>
+    <div class="label">이름</div><div class="input">센터에서 부를 이름 (30자)</div>
+    <div class="label">비밀번호</div><div class="input">10자 이상</div>
+    <div class="muted">영문 대문자·소문자·숫자·특수문자 중 2종류 이상</div>
+    <div class="label">비밀번호 확인</div><div class="input"></div>
+    <span class="btn primary full"><span class="n">8</span>가입하기</span>
+    <div class="cap">가입 2단계 → 끝나면 로그인 화면</div>
+  </div>
+</div>
+<table class="ann" style="margin-top:14px">
+<tr><th>#</th><th>요소</th><th>동작·이동</th><th>API</th><th>역할별 차이</th><th>상태</th></tr>
+<tr><td>1</td><td>아이디·비밀번호</td><td>엔터로도 제출. 비밀번호 칸은 마스킹</td><td>—</td><td>없음</td><td>입력 길이 제한(아이디 32, 비밀번호 128)</td></tr>
+<tr><td>2</td><td>로그인</td><td>성공 → 멘토는 W2, 담당자·시설장은 W5</td><td>#3</td><td>도착 화면만 다름</td><td>버튼 누른 동안 비활성(이중 제출 방지)</td></tr>
+<tr><td>3</td><td>가입 링크</td><td>/signup 1단계로</td><td>—</td><td></td><td></td></tr>
+<tr><td>4</td><td>실패 문구</td><td>틀린 비밀번호·없는 아이디·잠금(5회 실패 15분)·비활성 계정 모두 <b>같은 문구</b></td><td>#3 → 401</td><td></td><td>429면 「요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.」</td></tr>
+<tr><td>5·6</td><td>초대 코드 확인</td><td>성공 시 센터명·역할·만료 시각을 보여 주고 2단계로</td><td>#1</td><td>담당자 초대 코드면 「담당자로 초대」</td><td>404면 실패 문구, 429 문구 동일</td></tr>
+<tr><td>7·8</td><td>계정 정보·가입</td><td>가입 성공 → 로그인 화면에 「가입이 끝났습니다. 로그인해 주세요」 (자동 로그인 없음)</td><td>#2</td><td></td><td>409 아이디 중복 → 아이디 칸 아래 문구 / 422 비밀번호 정책 문구</td></tr>
+</table>
+</section>
+
+<!-- ============================== W2 ============================== -->
+<section id="W2">
+<h2>W2. 멘토 홈 <span class="role">멘토</span> <span class="muted">/mentor · 모바일 우선</span></h2>
+<div class="row">
+  <div class="phone"><div class="bar"></div>
+    <div class="hdr"><span>햇살지역아동센터 · 이도윤 (멘토)</span><span class="btn"><span class="n">1</span>로그아웃</span></div>
+    <div class="title">내 아동</div>
+    <div class="card"><span class="n">2</span><b>별빛</b> <span class="muted">중2</span><span class="badge on">진행 중</span><br><span class="muted">배정 기간 2026.09.30 ~ 12.20</span><div style="text-align:right" class="muted">인계 카드 보기 ›</div></div>
+    <div class="card"><b>구름</b> <span class="muted">중1</span><span class="badge on">진행 중</span><br><span class="muted">배정 기간 2026.09.06 ~ 12.10</span></div>
+    <div class="card"><b>나무</b> <span class="muted">초6</span><span class="badge on">진행 중</span><br><span class="muted">배정 기간 2026.09.06 ~ 12.10</span></div>
+    <div class="card off"><span class="n">3</span><b>새봄</b> 고1<span class="badge">시작 전</span><br>배정 기간 2026.10.14 ~ 2027.01.09<br>시작일부터 인계 카드와 기록을 볼 수 있습니다.</div>
+    <div class="cap">기본 상태</div>
+  </div>
+  <div class="phone"><div class="bar"></div>
+    <div class="hdr"><span>달빛지역아동센터 · 최지후 (멘토)</span><span class="btn">로그아웃</span></div>
+    <div class="title">내 아동</div>
+    <div class="box soft" style="text-align:center;padding:24px 8px"><span class="n">4</span>배정된 아동이 없습니다.<br><span class="muted">배정 기간이 끝났거나 아직 배정되지 않았습니다. 담당 선생님께 문의하세요.</span></div>
+    <div class="cap">빈 목록 (배정이 모두 끝난 멘토)</div>
+  </div>
+  <div class="col">
+<table class="ann">
+<tr><th>#</th><th>요소</th><th>동작·이동</th><th>API</th><th>상태</th></tr>
+<tr><td>1</td><td>상단 막대</td><td>센터·이름·역할 표시, 로그아웃 → W1</td><td>#5, #4</td><td>모든 화면 공통</td></tr>
+<tr><td>2</td><td>진행 중 카드</td><td>누르면 W3(해당 아동)</td><td>#16</td><td>로딩 중엔 회색 막대 3줄</td></tr>
+<tr><td>3</td><td>시작 전 카드</td><td><b>누를 수 없음</b>(점선·회색). 시작일 안내</td><td>#16</td><td></td></tr>
+<tr><td>4</td><td>빈 목록</td><td>안내 문구만</td><td>#16</td><td>끝난 배정·회수된 배정은 목록에 <b>나오지 않는다</b></td></tr>
+</table>
+<p class="note">기간이 끝난 아동을 「종료」 회색 카드로 남길지는 확인 요청 3번.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================== W3 ============================== -->
+<section id="W3">
+<h2>W3. 인계 카드 · 기록 보기 <span class="role">멘토(배정 기간 안)</span> <span class="muted">/mentor/children/:childId</span></h2>
+<div class="row">
+  <div class="phone"><div class="bar"></div>
+    <div class="hdr"><span>‹ 내 아동</span><span>이도윤 (멘토)</span></div>
+    <div class="title">별빛 <span class="muted">중2</span></div>
+    <div class="muted"><span class="n">1</span>내 배정 기간 2026.09.30 ~ 12.20</div>
+    <span class="btn primary full"><span class="n">2</span>＋ 오늘 기록 쓰기</span>
+    <h3><span class="n">3</span>인계 카드 <span class="muted">배정 시작 전 최근 4회</span></h3>
+    <div class="box soft"><b>담당자 공유 문구</b><br>· 간식 제공 전 담당자 확인<br>· 긴 문제는 소리 내어 읽게 하면 집중이 잘 됨</div>
+    <div class="card rec"><b>13회</b> <span class="muted">09.29 · 이전 선생님</span>
+      <dl><dt>오늘 한 것</dt><dd>일차방정식 활용 3문제</dd><dt>막힌 곳</dt><dd>거리·속력 문제에서 식 세우기</dd><dt>다음에 할 것</dt><dd><b>조건을 표로 정리하는 연습</b></dd></dl></div>
+    <div class="card rec"><b>12회</b> <span class="muted">09.22</span><dl><dt>오늘 한 것</dt><dd>일차방정식 풀이</dd><dt>막힌 곳</dt><dd>이항할 때 부호 실수</dd></dl></div>
+    <div class="muted" style="text-align:center">11회 · 10회 (아래로 이어짐)</div>
+    <h3><span class="n">4</span>내가 쓴 기록</h3>
+    <div class="card rec"><b>10.10</b> <span class="badge">정정됨</span>
+      <dl><dt>오늘 한 것</dt><dd>거리·속력 활용 2문제</dd></dl><span class="btn"><span class="n">5</span>정정하기</span></div>
+    <div class="cap">기본 상태</div>
+  </div>
+  <div class="phone"><div class="bar"></div>
+    <div class="hdr"><span>‹ 내 아동</span><span>김하람 (멘토)</span></div>
+    <div style="text-align:center;padding:40px 6px">
+      <div style="font-size:30px">⛔</div>
+      <div class="title" style="color:var(--warn)"><span class="n">6</span>열람 기간이 아니거나 권한이 없습니다</div>
+      <p class="muted">배정 기간이 끝났거나 회수된 아동의 기록은 볼 수 없습니다. 필요하면 담당 선생님께 문의하세요.</p>
+      <span class="btn">내 아동으로</span>
+    </div>
+    <div class="cap">403 차단 화면 (전임 멘토가 09.30 이후 접근)</div>
+  </div>
+  <div class="col">
+<table class="ann">
+<tr><th>#</th><th>요소</th><th>동작·이동</th><th>API</th><th>상태</th></tr>
+<tr><td>1</td><td>배정 기간</td><td>열람 가능 기간을 늘 보여 줌</td><td>#17</td><td></td></tr>
+<tr><td>2</td><td>오늘 기록 쓰기</td><td>W4(새 기록)</td><td>—</td><td></td></tr>
+<tr><td>3</td><td>인계 카드</td><td>공유 문구 먼저, 그다음 이전 기록 4회(최근 것이 위). 회차 번호는 그 아동의 누적 회차. 담당자 메모 <b>원문은 절대 없음</b></td><td>#17</td><td>이전 기록이 없으면 「첫 배정이라 이전 기록이 없습니다」</td></tr>
+<tr><td>4</td><td>내가 쓴 기록</td><td>배정 기간 중 내가 쓴 것만. 정정한 기록은 <b>최신본만</b> 보이고 「정정됨」 표시. 담당자가 숨긴 기록은 안 보임</td><td>#18</td><td>없으면 「아직 쓴 기록이 없습니다」</td></tr>
+<tr><td>5</td><td>정정하기</td><td>W4(정정 모드)</td><td>—</td><td></td></tr>
+<tr><td>6</td><td>403 차단 화면</td><td>기간 전·후, 회수, 다른 멘토·다른 센터 아동. 이유는 화면에 쓰지 않음(감사 로그에만)</td><td>#17·#18 → 403</td><td>새로고침해도 같은 화면</td></tr>
+</table>
+<p class="note">다른 멘토의 기록은 인계 카드(시작 전 4회)로만 본다. 배정 기간 중 다른 멘토가 쓴 기록은 멘토에게 보이지 않는다(기획서 ❷ 1절).</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================== W4 ============================== -->
+<section id="W4">
+<h2>W4. 회차 기록 입력 · 정정 <span class="role">멘토(배정 기간 안)</span> <span class="muted">/mentor/children/:id/records/new, /mentor/records/:id/correct</span></h2>
+<div class="row">
+  <div class="phone"><div class="bar"></div>
+    <div class="hdr"><span>‹ 별빛</span><span>이도윤 (멘토)</span></div>
+    <div class="title">회차 기록 쓰기</div>
+    <div class="label"><span class="n">1</span>날짜</div><div class="input">2026-10-11 (09.30 ~ 오늘)</div>
+    <div class="banner info"><span class="n">2</span>학습 내용만 적어 주세요. 건강·가정 관련 내용은 적지 않습니다.</div>
+    <div class="label"><span class="n">3</span>오늘 한 것 <span class="muted" style="float:right">0/500</span></div><div class="input area"></div>
+    <div class="label">막힌 곳 <span class="muted" style="float:right">0/500</span></div><div class="input area"></div>
+    <div class="label">다음에 할 것 <span class="muted" style="float:right">0/500</span></div><div class="input area"></div>
+    <div class="muted">세 칸 중 하나 이상</div>
+    <span class="btn primary"><span class="n">4</span>저장</span> <span class="btn">취소</span>
+    <div class="cap">새 기록</div>
+  </div>
+  <div class="phone"><div class="bar"></div>
+    <div style="height:120px" class="soft"></div>
+    <div class="dialog"><b><span class="n">5</span>건강 관련 내용이 있는 것 같아요</b>
+      <p class="muted">기록은 다음 선생님에게도 전해집니다. 학습 내용만 남겼는지 확인해 주세요. 건강·가정 정보는 담당 선생님께 직접 알려 주세요.</p>
+      <span class="btn primary">수정하기</span> <span class="btn">그래도 저장</span></div>
+    <div style="height:140px" class="soft"></div>
+    <div class="cap">민감어 확인창 (422 SENSITIVE_CONFIRM_REQUIRED)</div>
+  </div>
+  <div class="phone"><div class="bar"></div>
+    <div class="hdr"><span>‹ 별빛</span><span>이도윤 (멘토)</span></div>
+    <div class="title">기록 정정 <span class="muted">10.10</span></div>
+    <div class="box soft"><span class="n">6</span><b>원래 기록</b> <span class="muted">(읽기 전용)</span><br>오늘 한 것: 거리·속력 활용 2문제<br>막힌 곳: 단위 맞추기</div>
+    <div class="label">오늘 한 것</div><div class="input area">거리·속력 활용 2문제 (원래 내용이 채워짐)</div>
+    <div class="label">막힌 곳</div><div class="input area"></div>
+    <div class="label">다음에 할 것</div><div class="input area"></div>
+    <div class="muted">원래 기록은 지워지지 않고, 정정본이 새로 저장됩니다.</div>
+    <span class="btn primary">정정 저장</span>
+    <div class="cap">정정 모드</div>
+  </div>
+</div>
+<table class="ann" style="margin-top:14px">
+<tr><th>#</th><th>요소</th><th>동작·이동</th><th>API</th><th>상태</th></tr>
+<tr><td>1</td><td>날짜</td><td>기본값 오늘(한국 날짜). 배정 시작일 ~ 오늘(종료일 넘지 않음)만 고를 수 있음</td><td>—</td><td>범위 밖 → 422 「회차 날짜는 배정 기간 안이면서 오늘 이전이어야 합니다」</td></tr>
+<tr><td>2</td><td>안내 문구</td><td>항상 보임</td><td>—</td><td></td></tr>
+<tr><td>3</td><td>세 칸</td><td>칸마다 500자 카운터</td><td>—</td><td>빈 기록 저장 시 「세 칸 중 하나 이상」</td></tr>
+<tr><td>4</td><td>저장</td><td>성공 → W3로 돌아가 「저장했습니다」</td><td>#19</td><td>저장 중 버튼 비활성 / 그사이 기간이 끝나거나 회수되면 403 차단 화면</td></tr>
+<tr><td>5</td><td>민감어 확인창</td><td>「수정하기」 → 입력 화면 유지 / 「그래도 저장」 → 확인 표시를 붙여 다시 저장</td><td>#19·#20 (422 → 재요청)</td><td>확인 요청 건수는 감사 로그에 남음(기획서 ❸ 5절 지표)</td></tr>
+<tr><td>6</td><td>정정 모드</td><td>원래 기록을 위에 보여 주고 아래에 고칠 내용. 이미 정정된 기록이면 409 「최신 기록을 정정해 주세요」</td><td>#20</td><td>남의 기록·기간 밖 기록 → 403</td></tr>
+</table>
+</section>
+
+<!-- ============================== W5 ============================== -->
+<section id="W5">
+<h2>W5. 아동 · 배정 · 계정 관리 <span class="role">담당자</span> <span class="role">시설장</span> <span class="muted">/staff · PC 우선</span></h2>
+<div class="desk"><div class="chrome">https://…/staff</div><div class="body">
+  <div class="hdr"><span><b>이어가기</b> &nbsp; <u>아동·배정·계정</u> &nbsp; 기록·메모·감사 로그</span><span>햇살지역아동센터 · 정센터장 (시설장) <span class="btn">로그아웃</span></span></div>
+  <div class="tabs"><span class="on"><span class="n">1</span>아동</span><span>배정</span><span>계정</span></div>
+  <div class="grid2">
+    <div class="box"><b><span class="n">2</span>아동 등록</b>
+      <div class="label">별칭</div><div class="input">실명 대신 센터 안에서만 쓰는 별칭 (20자)</div>
+      <div class="label">학년</div><div class="input">선택 ▾ (초1~고3)</div>
+      <div>☑ 개인정보 처리 동의를 확인했습니다 <span class="muted">(필수 · 만 14세 미만은 법정대리인)</span></div>
+      <div>☐ 민감정보(건강 등) 별도 동의 또는 법령상 근거를 확인했습니다 <span class="muted">(선택)</span></div>
+      <span class="btn primary">등록</span></div>
+    <div class="box"><b>등록된 아동</b>
+      <table class="wf"><tr><th>별칭</th><th>학년</th><th>개인정보 동의</th><th>민감정보</th><th>관리</th></tr>
+      <tr><td>별빛</td><td>중2</td><td>10.11</td><td>10.11</td><td><span class="btn danger"><span class="n">4</span>파기</span><span class="badge lock">시설장</span></td></tr>
+      <tr><td>바다</td><td>초3</td><td>10.11</td><td>미확인</td><td><span class="btn"><span class="n">3</span>민감정보 확인</span> <span class="btn danger">파기</span></td></tr>
+      <tr><td>구름</td><td>중1</td><td>10.11</td><td>미확인</td><td><span class="btn">민감정보 확인</span> <span class="btn danger">파기</span></td></tr></table></div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <div class="dialog" style="max-width:340px"><b>아동 기록 파기</b><p class="muted">별빛의 회차 기록·메모가 모두 삭제되고 되돌릴 수 없습니다. 배정은 회수 처리되며, 감사 로그는 남습니다.<br>확인을 위해 별칭 <b>별빛</b>을 입력하세요.</p><div class="input">별빛</div><span class="btn danger">파기</span> <span class="btn">취소</span></div>
+  </div>
+  <div class="tabs" style="margin-top:16px"><span>아동</span><span class="on"><span class="n">5</span>배정</span><span>계정</span></div>
+  <div class="grid2">
+    <div class="box"><b>배정 만들기</b>
+      <div class="label">멘토</div><div class="input">이도윤 ▾</div><div class="label">아동</div><div class="input">별빛 (중2) ▾</div>
+      <div class="grid2"><div><div class="label">시작일</div><div class="input">2026-09-30</div></div><div><div class="label">종료일</div><div class="input">2026-12-20</div></div></div>
+      <div class="muted">배정 기간 동안만 멘토가 인계 카드와 기록을 봅니다. 후임 시작일은 전임 마지막 회차 다음 날 ~ 첫 회차 전으로. (최대 366일)</div>
+      <span class="btn primary">배정 만들기</span></div>
+    <div class="box"><b>배정 목록</b> <span class="muted">아동·멘토로 거르기 ▾</span>
+      <table class="wf"><tr><th>멘토</th><th>아동</th><th>기간</th><th>상태</th><th></th></tr>
+      <tr><td>이도윤</td><td>새봄</td><td>10.14~01.09</td><td><span class="badge">시작 전</span></td><td><span class="btn">회수</span></td></tr>
+      <tr><td>이도윤</td><td>별빛</td><td>09.30~12.20</td><td><span class="badge on">진행 중</span></td><td><span class="btn"><span class="n">6</span>회수</span></td></tr>
+      <tr><td>김하람</td><td>별빛</td><td>07.03~09.29</td><td><span class="badge">종료</span></td><td></td></tr>
+      <tr><td>김하람</td><td>하늘</td><td>09.01~12.10</td><td><span class="badge warn">회수됨</span></td><td></td></tr></table>
+      <div class="dialog" style="margin-top:8px"><b>배정 회수</b><p class="muted">회수하면 이도윤 멘토는 <b>다음 요청부터</b> 별빛의 기록을 볼 수 없습니다.</p><span class="btn danger">회수</span> <span class="btn">취소</span></div></div>
+  </div>
+  <div class="tabs" style="margin-top:16px"><span>아동</span><span>배정</span><span class="on"><span class="n">7</span>계정</span></div>
+  <div class="grid2">
+    <div class="box"><b>초대 코드 발급</b>
+      <div class="label">초대할 역할</div><div class="input">멘토 ▾ (담당자 <span class="badge lock">시설장만</span>)</div>
+      <span class="btn primary">코드 발급</span>
+      <div class="box soft"><span class="n">8</span><b>gH3k-…-Qz9</b> <span class="btn">복사</span><br><span class="muted">이 코드는 지금 한 번만 보입니다 · 72시간 동안 1회 사용</span></div></div>
+    <div class="box"><b>계정 목록</b>
+      <table class="wf"><tr><th>이름</th><th>아이디</th><th>역할</th><th>상태</th><th></th></tr>
+      <tr><td>햇살 담당자</td><td>sunny_staff</td><td>담당자</td><td>활성</td><td><span class="btn">비활성화</span><span class="badge lock">시설장</span></td></tr>
+      <tr><td>이도윤</td><td>mentor_lee</td><td>멘토</td><td>활성</td><td><span class="btn">비활성화</span></td></tr>
+      <tr class="hl"><td>최지후</td><td>mentor_choi</td><td>멘토</td><td><span class="badge warn"><span class="n">9</span>배정이 끝난 활성 계정</span></td><td><span class="btn danger">비활성화</span></td></tr>
+      <tr><td>박서연</td><td>mentor_park</td><td>멘토</td><td class="muted">비활성 (10.02)</td><td></td></tr></table></div>
+  </div>
+</div></div>
+<table class="ann" style="margin-top:14px">
+<tr><th>#</th><th>요소</th><th>동작·이동</th><th>API</th><th>역할별 차이</th><th>상태</th></tr>
+<tr><td>1</td><td>탭</td><td>아동 / 배정 / 계정. 마지막으로 연 탭을 기억(주소 쿼리)</td><td>—</td><td></td><td></td></tr>
+<tr><td>2</td><td>아동 등록</td><td>개인정보 동의 체크 없으면 등록 버튼 비활성. 생년월일·주소·연락처 칸은 없음</td><td>#9</td><td></td><td>422 별칭 형식</td></tr>
+<tr><td>3</td><td>민감정보 확인</td><td>나중에 확인 기록. 확인 전에는 W6에서 메모 원문 입력 불가</td><td>#11</td><td></td><td>이미 확인 → 409</td></tr>
+<tr><td>4</td><td>파기</td><td>별칭을 직접 입력해야 실행(확인창)</td><td>#12</td><td><b>시설장에게만 보임</b></td><td>담당자가 API로 호출해도 403</td></tr>
+<tr><td>5</td><td>배정 만들기·목록</td><td>상태 배지: 시작 전/진행 중/종료/회수됨</td><td>#13, #14</td><td></td><td>같은 멘토·아동의 기간 겹침 → 409 「기간이 겹치는 배정이 이미 있습니다」</td></tr>
+<tr><td>6</td><td>회수</td><td>확인창 → 회수. 진행 중·시작 전만 버튼</td><td>#15</td><td></td><td>이미 회수 → 409</td></tr>
+<tr><td>7·8</td><td>초대 코드</td><td>발급 후 코드는 그 자리에서 한 번만 보임 + 복사</td><td>#6</td><td>담당자는 멘토만, <b>시설장은 담당자도</b></td><td></td></tr>
+<tr><td>9</td><td>배정이 끝난 활성 계정</td><td>배정이 모두 끝났는데 활성인 멘토 행을 강조 → 비활성화하면 세션 즉시 폐기</td><td>#7, #8</td><td>담당자는 멘토만, 시설장은 담당자·멘토(본인 제외) 비활성화</td><td></td></tr>
+</table>
+</section>
+
+<!-- ============================== W6 ============================== -->
+<section id="W6">
+<h2>W6. 기록 관리 · 메모 · 감사 로그 <span class="role">담당자</span> <span class="role">시설장</span> <span class="muted">/staff/records · PC 우선</span></h2>
+<div class="desk"><div class="chrome">https://…/staff/records</div><div class="body">
+  <div class="hdr"><span><b>이어가기</b> &nbsp; 아동·배정·계정 &nbsp; <u>기록·메모·감사 로그</u></span><span>햇살지역아동센터 · 햇살 담당자 (담당자) <span class="btn">로그아웃</span></span></div>
+  <div class="tabs"><span class="on">기록·메모</span><span>감사 로그</span></div>
+  <div class="label"><span class="n">1</span>아동 선택</div><div class="input" style="max-width:260px">별빛 (중2) ▾</div>
+  <div class="grid2">
+    <div class="box"><b><span class="n">2</span>회차 기록 (전체)</b>
+      <div class="card rec"><b>10.10</b> <span class="muted">이도윤</span> <span class="badge">정정본</span><dl><dt>오늘 한 것</dt><dd>거리·속력 활용 2문제</dd></dl>
+        <span class="btn"><span class="n">3</span>숨기기</span><span class="btn"><span class="n">4</span>민감정보 칸 지우기</span></div>
+      <div class="card rec" style="color:#999"><b>10.10</b> 이도윤 <span class="badge">정정되어 대체됨</span><dl><dt>오늘 한 것</dt><dd>거리 속력 2문제</dd></dl></div>
+      <div class="card rec"><b>10.03</b> 이도윤 <span class="badge warn">숨김 · 민감정보</span> <span class="badge">일부 칸 지움</span><dl><dt>막힌 곳</dt><dd class="muted">(지움)</dd></dl></div>
+      <div class="card rec"><b>09.29</b> 김하람 <span class="muted">13회</span><dl><dt>오늘 한 것</dt><dd>일차방정식 활용 3문제</dd></dl></div>
+    </div>
+    <div class="box"><b><span class="n">5</span>담당자 메모</b>
+      <div class="label">공유 문구 <span class="muted">— 멘토 인계 카드에 보임 (200자)</span></div><div class="input">예: 간식 제공 전 담당자 확인</div>
+      <div class="label">원문 <span class="muted">— 담당자·시설장만, 암호화 저장 (2000자)</span></div><div class="input area">건강·가정 관련 원문</div>
+      <div class="banner">바다: 민감정보 동의·근거가 확인되지 않아 원문을 입력할 수 없습니다. (아동 탭에서 확인)</div>
+      <span class="btn primary">메모 저장</span>
+      <div class="card">공유: 간식 제공 전 담당자 확인 <span class="badge">원문 있음</span> <span class="muted">햇살 담당자 · 10.11</span><br><span class="btn"><span class="n">6</span>원문 보기</span></div>
+      <div class="box soft">원문: 우유 알레르기 있음. 간식은 담당자가 직접 확인.<br><span class="muted">원문을 열면 누가 언제 봤는지 감사 로그에 남습니다.</span></div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:8px">
+    <div class="dialog"><b>기록 숨기기</b><p class="muted">숨긴 기록은 멘토 화면과 인계 카드에서 빠지고, 담당자 화면에는 사유와 함께 남습니다.</p>
+      ○ 부적절한 내용 &nbsp; ○ 다른 아동 기록 &nbsp; ○ 중복 &nbsp; ● 민감정보 &nbsp; ○ 기타<br><span class="btn danger">숨기기</span> <span class="btn">취소</span></div>
+    <div class="dialog"><b>민감정보 칸 지우기</b><p class="muted">고른 칸의 내용만 지웁니다. 기록 행과 감사 기록은 남습니다.</p>
+      ☐ 오늘 한 것 &nbsp; ☑ 막힌 곳 &nbsp; ☐ 다음에 할 것<br><span class="btn danger">지우기</span> <span class="btn">취소</span></div>
+  </div>
+  <div class="tabs" style="margin-top:16px"><span>기록·메모</span><span class="on"><span class="n">7</span>감사 로그</span></div>
+  <div class="muted">동작 [전체 ▾] &nbsp; 결과 [전체 ▾] &nbsp; 기간 [2026-10-01] ~ [2026-10-11] &nbsp; <span class="btn">조회</span></div>
+  <table class="wf" style="margin-top:6px"><tr><th>시각</th><th>행위자(ID)</th><th>동작</th><th>대상</th><th>결과</th><th>IP</th><th>상세</th></tr>
+  <tr class="hl"><td>10.11 14:02</td><td>3 (김하람)</td><td>access.denied</td><td>child #1</td><td><span class="badge warn">거부</span></td><td>203.0.113.7</td><td>사유 after_end · 기간 07.03~09.29 · 경로 /children/{id}/records</td></tr>
+  <tr><td>10.11 13:58</td><td>4 (이도윤)</td><td>handover.view</td><td>child #1</td><td>성공</td><td>198.51.100.2</td><td>records 4</td></tr>
+  <tr><td>10.11 13:40</td><td>2 (햇살 담당자)</td><td>note.view</td><td>note #3</td><td>성공</td><td>192.0.2.10</td><td>child_id 1</td></tr>
+  <tr><td>10.11 13:31</td><td>2 (햇살 담당자)</td><td>user.disable</td><td>user #7</td><td>성공</td><td>192.0.2.10</td><td>revoked_sessions 2</td></tr>
+  <tr><td>10.11 13:20</td><td>4 (이도윤)</td><td>record.sensitive_prompt</td><td>child #1</td><td>성공</td><td>198.51.100.2</td><td>categories health</td></tr></table>
+  <div class="muted" style="text-align:right">1–50 / 128 &nbsp; <span class="btn">이전</span><span class="btn">다음</span></div>
+</div></div>
+<table class="ann" style="margin-top:14px">
+<tr><th>#</th><th>요소</th><th>동작·이동</th><th>API</th><th>상태·비고</th></tr>
+<tr><td>1</td><td>아동 선택</td><td>고르면 기록·메모를 불러옴</td><td>#10</td><td>선택 전 「기록을 볼 아동을 고르세요」</td></tr>
+<tr><td>2</td><td>전체 기록</td><td>숨김·정정 전 원본까지 모두 보임. 배지: 정정본 / 정정되어 대체됨 / 숨김·사유 / 일부 칸 지움</td><td>#18</td><td>최근 500건</td></tr>
+<tr><td>3</td><td>숨기기</td><td>사유 5종 중 선택 → 멘토 화면·인계 카드에서 빠짐. 정정본을 숨기면 원래 기록이 다시 보임</td><td>#21</td><td>이미 숨김 → 409</td></tr>
+<tr><td>4</td><td>칸 지우기</td><td>고른 칸만 빈칸으로(행은 유지)</td><td>#22</td><td></td></tr>
+<tr><td>5</td><td>메모 작성</td><td>공유 문구와 원문 중 하나 이상. 민감정보 미확인 아동은 원문 칸 비활성 + 안내</td><td>#23, #24</td><td>422 SENSITIVE_BASIS_REQUIRED</td></tr>
+<tr><td>6</td><td>원문 보기</td><td>누를 때만 불러오고, 열람은 감사 로그(note.view)에 기록</td><td>#25</td><td>멘토에게는 이 기능 자체가 없음(403)</td></tr>
+<tr><td>7</td><td>감사 로그</td><td>동작·결과·기간(한국 날짜, 양 끝 포함)으로 거르기, 50건씩. 자기 센터 것만</td><td>#26</td><td>아동은 이름 대신 내부 ID. 월 1회 점검(시설장 운영 절차)</td></tr>
+</table>
+</section>
+
+<!-- ============================== STATES ============================== -->
+<section id="states">
+<h2>공통 상태 화면</h2>
+<div class="row">
+  <div class="phone"><div class="bar"></div><div class="title" style="text-align:center">이어가기</div>
+    <div class="banner">세션이 만료되었습니다. 다시 로그인해 주세요.</div>
+    <div class="label">아이디</div><div class="input"></div><div class="label">비밀번호</div><div class="input"></div><span class="btn primary full">로그인</span>
+    <div class="cap">401 — 10분 미사용·로그아웃·계정 비활성화</div></div>
+  <div class="phone"><div class="bar"></div><div class="hdr"><span>‹ 내 아동</span><span></span></div>
+    <div class="skel" style="width:40%"></div><div class="skel"></div><div class="skel" style="width:80%"></div><div class="box"><div class="skel"></div><div class="skel" style="width:60%"></div></div><div class="box"><div class="skel"></div><div class="skel" style="width:70%"></div></div>
+    <div class="cap">로딩 (회색 막대)</div></div>
+  <div class="phone"><div class="bar"></div><div style="text-align:center;padding:50px 6px"><div class="title">문제가 생겼습니다</div><p class="muted">잠시 후 다시 시도해 주세요.<br>(오류 내용·코드 위치는 화면에 보이지 않습니다)</p><span class="btn">다시 시도</span></div>
+    <div class="cap">서버 오류 (500)</div></div>
+  <div class="phone"><div class="bar"></div><div style="text-align:center;padding:50px 6px"><div class="title">페이지를 찾을 수 없습니다</div><p class="muted">주소를 다시 확인해 주세요.</p><span class="btn">처음으로</span></div>
+    <div class="cap">404</div></div>
+</div>
+</section>
+
+<!-- ============================== DIFF / QUESTIONS ============================== -->
+<section id="diff">
+<h2>기획서 대비 차이</h2>
+<table class="ann">
+<tr><th>#</th><th>기획서</th><th>와이어프레임</th><th>이유</th></tr>
+<tr><td>1</td><td>화면 6개 (① 로그인·초대 가입 … ⑥ 기록 관리·감사 로그)</td><td>같음. ①은 로그인 + 가입 2단계, ⑤⑥은 탭으로 나눔</td><td>화면 수 유지, 기능 배치만 구체화</td></tr>
+<tr><td>2</td><td>기기 언급 없음</td><td>멘토 화면(W1~W4) 휴대폰 우선, 담당자 화면(W5·W6) PC 우선</td><td>봉사자는 수업 직후 휴대폰으로 기록, 담당자는 센터 PC로 관리</td></tr>
+<tr><td>3</td><td>F9 기간 밖 차단(403)</td><td>403 전용 차단 화면 + 401·404·오류·로딩 공통 상태 추가</td><td>차단을 화면으로 보여 줘야 시연에서 핵심 기능이 드러남</td></tr>
+<tr><td>4</td><td>F2 아동 등록 시 동의 2개 확인</td><td>민감정보 확인은 등록 후 목록에서도 가능</td><td>민감정보 동의가 늦게 오는 경우(API #11)</td></tr>
+<tr><td>5</td><td>F8 파기 = 기록·배정 삭제</td><td>파기 시 기록·메모 삭제, 배정은 회수 처리(아동 연결만 끊음)</td><td>"배정이 끝난 활성 계정" 신호를 지키기 위해(보안 리뷰 반영, 보안설계 4-1절)</td></tr>
+<tr><td>6</td><td>인계 카드 예시(13회 등)</td><td>회차 번호 = 그 아동의 누적 회차(숨김·정정 전 원본 제외)</td><td>예시와 같은 표기</td></tr>
+</table>
+<h3>지금 만든 프론트 골격 대비 바꿀 것</h3>
+<p class="note">경로·API 연결·화면 수는 골격과 같다. 바꿀 것은 ① 멘토 화면 모바일 레이아웃(카드형) ② 403 전용 차단 화면(지금은 문구만) ③ W2 빈 목록·시작 전 카드 안내 문구 ④ W5 파기·회수 확인창 문구 ⑤ W6 숨김 정정본 표시 규칙. 확정되면 바로 반영한다.</p>
+</section>
+
+<section id="questions">
+<h2>확인 요청 (5문항, 한 번에 답해 주면 됨)</h2>
+<table class="ann">
+<tr><th>#</th><th>질문</th><th>추천</th></tr>
+<tr><td>1</td><td>멘토 화면은 휴대폰 우선, 담당자 화면은 PC 우선으로 갈까요?</td><td>예</td></tr>
+<tr><td>2</td><td>W3에서 인계 카드와 「내가 쓴 기록」을 한 화면에 세로로 둘까요, 탭으로 나눌까요?</td><td>세로 — 첫 회차 전에 한 번에 읽게</td></tr>
+<tr><td>3</td><td>기간이 끝난 아동은 멘토 홈에서 아예 숨길까요, 「종료」 회색 카드로 남길까요?</td><td>숨김 — 기간 밖에는 존재도 덜 드러내기</td></tr>
+<tr><td>4</td><td>아동 파기는 별칭을 직접 입력해야 실행되게 할까요?</td><td>예 — 되돌릴 수 없는 작업</td></tr>
+<tr><td>5</td><td>시연 기준 화면은 멘토 = 휴대폰 화면 녹화, 담당자 = PC 화면 녹화로 나눠 찍을까요?</td><td>예 — 실제 사용 장면과 같게</td></tr>
+</table>
+</section>
+
+</main>
+</body>
+</html>

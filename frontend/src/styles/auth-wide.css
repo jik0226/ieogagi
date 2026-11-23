@@ -1,0 +1,50 @@
+/* ---------- W1 on wide screens: log-in and sign-up in two columns ----------
+   Below 1024px the pages stay the phone-width column of mentor-auth.css.
+   From 1024px (staff and directors use a PC) the brand (log-in) or the title
+   and step (sign-up) sit on the left and the form on the right, so the page
+   uses the window instead of a 480px strip. The page spans the window, so the
+   corner discs of mentor-auth.css move to the window corners. */
+@media (min-width: 1024px) {
+  .auth-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 28rem);
+    grid-auto-rows: min-content;
+    align-content: center;
+    column-gap: 4rem;
+    max-width: none;
+    padding: var(--space-7) max(var(--space-7), calc((100% - 60rem) / 2));
+  }
+
+  .auth-page > * {
+    grid-column: 2;
+  }
+
+  /* The left column spans every row the right column needs (at most four:
+     two notices, the form and the link below it). */
+  .auth-page > .brand-block,
+  .signup-page > h1 {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    align-self: center;
+    margin-top: 0;
+  }
+
+  /* The first item of the right column starts level with the top. */
+  .auth-page > :nth-child(2) {
+    margin-top: 0;
+  }
+
+  .login-page .brand-block h1 {
+    font-size: 3.5rem;
+  }
+
+  .login-page .brand-block .meta {
+    font-size: var(--font-size-lg);
+  }
+
+  .signup-page > h1 {
+    align-items: flex-start;
+    font-size: 2.25rem;
+    text-align: left;
+  }
+}

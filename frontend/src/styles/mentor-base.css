@@ -1,0 +1,173 @@
+/* Mentor screens (W1-W4) are phone-first: one column, full-width main
+   buttons, 44px touch targets. The page is centred at 480px on wide screens. */
+.page--mentor .btn--small,
+.page--narrow .btn--small,
+.app-header--mentor .btn--small {
+  min-height: var(--tap-min);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  margin-bottom: var(--space-1);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.page-heading {
+  margin-bottom: var(--space-1);
+}
+
+.page-heading__sub {
+  margin-left: var(--space-1);
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-text-muted);
+}
+
+/* Section titles on the hand-over page lead with a short brand bar. */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.section-title::before {
+  content: "";
+  flex: none;
+  width: 4px;
+  height: 1.1em;
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+
+.section-title + .meta {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* ---------- W1: log-in / sign-up ---------- */
+.brand-block {
+  position: relative;
+  margin-bottom: var(--space-5);
+  padding-top: 3.25rem;
+  text-align: center;
+}
+
+/* The same two-ring mark as the header, larger. */
+.brand-block::before,
+.brand-block::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  border: 5px solid var(--color-primary);
+  border-radius: 50%;
+}
+
+.brand-block::before {
+  margin-left: -27px;
+}
+
+.brand-block::after {
+  margin-left: -7px;
+  border-color: var(--color-accent);
+}
+
+.brand-block h1 {
+  margin-bottom: var(--space-1);
+  font-size: var(--font-size-2xl);
+  color: var(--color-primary);
+}
+
+.brand-block p {
+  margin: 0;
+}
+
+.stepper {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* ---------- W2: my children ---------- */
+.assignment-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.assignment-card__head h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.assignment-card__head .badge {
+  margin-left: auto;
+}
+
+.assignment-card p {
+  margin: 0;
+}
+
+.assignment-card__cta {
+  margin-top: var(--space-2);
+  text-align: right;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.card--upcoming .assignment-card__head + .meta + p {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border-strong);
+}
+
+/* ---------- W3: hand-over card ---------- */
+.share-box {
+  padding: var(--space-4);
+  background: var(--color-sage);
+  border: 0;
+  border-radius: var(--radius-lg);
+}
+
+.share-box h3 {
+  margin-bottom: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+}
+
+.share-box ul {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.share-box li::marker {
+  color: var(--color-primary);
+}
+
+.share-box li + li {
+  margin-top: var(--space-1);
+}
+
+.session-no {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+}
+
+.record__actions {
+  display: flex;
+  justify-content: flex-end;
+}

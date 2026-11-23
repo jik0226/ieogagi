@@ -1,0 +1,210 @@
+/* ---------- Tabs: current tab = bold + underline bar (not colour alone) ---------- */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tabs__tab {
+  min-height: var(--tap-min);
+  margin-bottom: -1px;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.tabs__tab:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.tabs__tab[aria-selected="true"] {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ---------- Tables (PC: wide; phone: scroll sideways) ---------- */
+.table-wrap {
+  /* Positioned so visually hidden header text cannot widen the whole page. */
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table--wide {
+  min-width: 960px;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Every body row is at least 52px, so rows with and without a 36px button
+   line up. */
+.table tbody th,
+.table tbody td {
+  height: 3.25rem;
+}
+
+.table thead th {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  background: var(--color-surface-muted);
+  border-bottom-color: var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.table tbody tr > * {
+  transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:not(.is-denied):not(.is-highlight):hover > * {
+  background: var(--color-row-hover);
+}
+
+.table tr.is-highlight > * {
+  background: var(--color-warning-soft);
+}
+
+/* Denied audit rows: tinted row plus the "거부" badge. */
+.table tr.is-denied > * {
+  background: var(--color-danger-soft);
+}
+
+.table tbody th {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  white-space: normal;
+}
+
+.table__mono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.table td.table__nowrap {
+  white-space: nowrap;
+}
+
+.table__gloss {
+  display: block;
+}
+
+/* Wide tables (audit log) keep short cells on one line; only the detail
+   column wraps. */
+.table--wide td {
+  white-space: nowrap;
+}
+
+.table--wide td.table__detail {
+  min-width: 14rem;
+  font-size: var(--font-size-sm);
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* ---------- Dialog ---------- */
+.dialog {
+  width: min(520px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: var(--space-5);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-dialog);
+}
+
+.dialog[open] {
+  animation: dialog-in 160ms ease-out;
+}
+
+/* Destructive dialogs (the confirm button is red) get a red top edge. */
+.dialog:has(.dialog__actions .btn--danger) {
+  border-top: 4px solid var(--color-danger);
+}
+
+.dialog > h2 {
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-lg);
+}
+
+.dialog::backdrop {
+  background: var(--color-backdrop);
+}
+
+.dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.dialog__actions .btn {
+  min-width: 6rem;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Phones: dialog buttons stack, full width, main action on top ---------- */
+@media (max-width: 480px) {
+  .dialog {
+    padding: var(--space-4);
+  }
+
+  .dialog__actions {
+    flex-direction: column-reverse;
+  }
+
+  .dialog__actions--primary-first {
+    flex-direction: column;
+  }
+
+  .dialog__actions .btn {
+    width: 100%;
+  }
+}

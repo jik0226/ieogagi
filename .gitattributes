@@ -1,0 +1,3 @@
+# Keep LF line endings on every platform: shell scripts and the Makefile break with CRLF
+# (for example when the repository is checked out with Git for Windows).
+* text=auto eol=lf

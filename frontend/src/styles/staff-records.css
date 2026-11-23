@@ -1,0 +1,185 @@
+/* ================= Records & notes (W5): readable records, "archive" notes =================
+   Records: session number in a brown circle, label column + text column.
+   Notes: cream paper cards with a date stamp, like an archive of letters.
+   Text on the cream paper (accent-soft) is 15.5:1, muted text 6.1:1. */
+
+/* ---------- Child picker (radio chips) ---------- */
+.child-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-raised);
+}
+
+.child-picker__legend {
+  float: left;
+  margin-right: var(--space-3);
+  padding: 0;
+  font-weight: 700;
+}
+
+.chip__text .chip__sub {
+  margin-left: var(--space-1);
+  font-weight: 500;
+}
+
+/* ---------- Panel heading ("회차 기록", "담당자 메모") ---------- */
+.panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
+
+.panel-head__sub {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* Records get a little more width than notes on wide screens. */
+@media (min-width: 1100px) {
+  .split--records {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+/* ---------- Session record card ---------- */
+.staff-record {
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.staff-record__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.staff-record__no {
+  display: inline-grid;
+  flex: none;
+  grid-auto-flow: column;
+  align-items: baseline;
+  place-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--color-primary);
+  border-radius: 50%;
+  color: var(--color-on-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.staff-record__no-unit {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.staff-record__when {
+  display: grid;
+  line-height: var(--line-height-tight);
+}
+
+.staff-record__date {
+  font-size: var(--font-size-lg);
+}
+
+.staff-record__author {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.staff-record__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+/* Fields: label pill on the left, text on the right, a dashed rule between. */
+.staff-record .record__fields {
+  gap: 0;
+}
+
+.staff-record .record__fields > div {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px dashed var(--color-border);
+}
+
+.staff-record .record__fields dt {
+  justify-self: start;
+  margin: 0;
+  padding: 2px var(--space-3);
+  background: var(--color-peach);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+}
+
+.staff-record .record__fields > div:nth-child(2) dt {
+  background: var(--color-sage);
+}
+
+.staff-record .record__fields > div:nth-child(3) dt {
+  background: var(--color-butter);
+}
+
+.staff-record .record__fields dd {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+}
+
+.staff-record__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Replaced or hidden: grey circle and plain labels, text stays readable. */
+.record--muted .staff-record__no {
+  background: var(--color-border-strong);
+}
+
+.record--muted.staff-record .record__fields dt {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.record--muted.staff-record .record__fields > div {
+  border-top-color: var(--color-border-strong);
+}
+
+@media (max-width: 480px) {
+  .staff-record .record__fields > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+
+  .child-picker {
+    border-radius: var(--radius-lg);
+  }
+}

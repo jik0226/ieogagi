@@ -1,0 +1,96 @@
+/* ---------- Session records (mentor and staff) ---------- */
+.record {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* Replaced or hidden records: grey card with its own text colour (no opacity). */
+.record--muted {
+  background: var(--color-surface-dimmed);
+  border-style: dashed;
+  border-color: var(--color-border-strong);
+  box-shadow: none;
+  color: var(--color-text-muted);
+}
+
+.record__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* A heading row at the top of the card is set off by a hairline. */
+.record > .record__head:first-child {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.record--muted > .record__head:first-child {
+  border-bottom-color: var(--color-border);
+}
+
+.record__fields {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.record__fields dt {
+  margin-bottom: 2px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.record__fields dd {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.record__fields dd.record__empty {
+  color: var(--color-text-muted);
+}
+
+/* "다음에 할 것" is what the next teacher reads first: a highlighter band in
+   the poster yellow (the bar is decoration; the label names the field). */
+.record__field--emphasis {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-peach);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+}
+
+.record__field--emphasis dt {
+  color: var(--color-primary);
+}
+
+.record__field--emphasis dd {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.record--muted .record__field--emphasis {
+  background: none;
+  border-left-color: var(--color-border-strong);
+}
+
+/* Read-only copy of a record (original before correction, revealed note). */
+.record-original {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.record-original h2,
+.record-original h3 {
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-base);
+}
+
+.record-original > :last-child {
+  margin-bottom: 0;
+}

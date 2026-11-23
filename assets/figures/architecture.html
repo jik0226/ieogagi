@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이어가기 시스템 아키텍처 구성도</title>
+<link rel="stylesheet" href="figure.css">
+<style>
+  .layer { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .label { flex: 0 0 104px; background: var(--grey-bg); border-right: 1px solid var(--border);
+           padding: 8px 6px; display: flex; flex-direction: column; justify-content: center;
+           font-weight: 700; color: var(--blue); font-size: 16px; line-height: 1.3; }
+  .label .ln { color: var(--muted); font-size: 14px; }
+  .body { flex: 1; min-width: 0; padding: 8px; display: flex; flex-direction: column; gap: 7px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .box ul { list-style: none; font-size: 15.5px; line-height: 1.4; }
+  .box li::before { content: "· "; color: var(--muted); }
+  .ad { font-size: 15.5px; line-height: 1.4; }
+  .band { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px;
+          background: #fafbfc; font-size: 15.5px; }
+  .band b { color: var(--blue); }
+  .step { font-weight: 700; color: var(--blue); font-size: 15px; margin: 0 0 -3px 2px; }
+  .tables { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+  .tbl { border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; background: var(--chip-bg);
+         font-family: Menlo, Consolas, monospace; font-size: 14.5px; text-align: center; }
+  .tbl .s { display: block; font-family: "Apple SD Gothic Neo", sans-serif; font-size: 13.5px; color: var(--muted); }
+  .tbl.key { border: 2px solid var(--amber); background: var(--amber-bg); color: var(--amber-text); font-weight: 700; }
+  .tbl.key .s { color: var(--amber-text); font-weight: 600; }
+  .bottom { margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--grey-bg);
+            padding: 6px 10px; font-size: 15px; color: var(--muted); }
+  .bottom b { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="layer">
+  <div class="label"><span class="ln">L1</span>사용자<br>브라우저<br>(React SPA)</div>
+  <div class="body">
+    <div class="grid3">
+      <div class="box"><div class="t">멘토 (교육봉사자)</div>
+        <ul><li>초대 가입·로그인</li><li>멘토 홈(배정된 아이)</li><li>인계 카드·기록 보기</li><li>회차 기록 입력·정정</li></ul></div>
+      <div class="box"><div class="t">담당자 (생활복지사)</div>
+        <ul><li>아동 등록·동의 확인</li><li>배정 기간 설정·회수</li><li>기록 숨김·메모 원문</li><li>감사 로그·끝난 계정 목록</li></ul></div>
+      <div class="box"><div class="t">시설장</div>
+        <ul><li>담당자 계정 발급 (배정 권한 위임)</li><li>아동 기록 파기</li><li>담당자 기능 전부</li></ul></div>
+    </div>
+    <div class="note">HTTPS(Caddy) · 세션 쿠키 HttpOnly·Secure·SameSite=Strict · React 기본 이스케이프</div>
+  </div>
+</div>
+
+<div class="down">▼ HTTPS · JSON API (세션 쿠키)</div>
+
+<div class="layer">
+  <div class="label"><span class="ln">L2</span>애플리케이션<br>서버<br>Python<br>FastAPI</div>
+  <div class="body">
+    <div class="step">① 인증·세션</div>
+    <div class="band"><b>DB 세션 테이블</b> 조회(만료·유휴 10분·수동 폐기·계정 비활성) · 로그인 계정별 실패 잠금·IP별 제한(slowapi) · Origin 확인(CSRF)</div>
+    <div class="step">② 공통 인가 계층 — 기록·인계 카드·메모 API가 모두 통과</div>
+    <div class="gate">
+      <div class="cond">멘토: 같은 센터 ∧ <b>본인 배정</b> ∧ <b>시작일 ≤ 오늘 ≤ 종료일</b> ∧ <b>미회수</b><br>
+      시설장·담당자: 같은 센터 ∧ 역할 확인<br>
+      <span style="font-size:15.5px">요청마다 DB 조회 · 한 번의 SQL로 판정 · 오늘 = 앱이 계산한 한국 시간 날짜</span></div>
+    </div>
+    <div class="step">③ 도메인 API (약 20개)</div>
+    <div class="grid3">
+      <div class="box"><div class="t">초대·계정</div>
+        <div class="ad">1회용 코드 72시간, 원자적 UPDATE · 담당자 초대는 시설장만 · 계정 비활성화</div></div>
+      <div class="box amber"><div class="t">아동·배정</div>
+        <div class="ad">별칭·학년·동의 확인 · 시작일·종료일·회수 · 파기는 시설장만</div></div>
+      <div class="box"><div class="t">회차 기록</div>
+        <div class="ad">덮어쓰기 없음 · 정정은 새 행 · 담당자 숨김·민감정보 삭제</div></div>
+      <div class="box"><div class="t">인계 카드</div>
+        <div class="ad">배정 시작 전 최근 4회 + 공유 문구 · 규칙 기반, 생성형 AI 없음</div></div>
+      <div class="box"><div class="t">담당자 메모</div>
+        <div class="ad">원문 AES-256-GCM(레코드별 nonce, AAD, key_id) · 키는 Docker secret · 멘토 응답에 원문 필드 없음</div></div>
+      <div class="box blue"><div class="t">감사 로그 기록기</div>
+        <div class="ad">로그인, 계정·배정 변경, 열람·작성·숨김·파기·차단을 IP와 함께 기록 · 추가·조회만 허용 · 실명 대신 내부 ID</div></div>
+    </div>
+    <div class="note">전역 예외 핸들러 · 운영 환경 debug·/docs 차단 · SQLAlchemy ORM 바인딩</div>
+  </div>
+</div>
+
+<div class="down">▼ SQLAlchemy</div>
+
+<div class="layer">
+  <div class="label"><span class="ln">L3</span>데이터베이스<br>PostgreSQL<br>(9 테이블)</div>
+  <div class="body">
+    <div class="tables">
+      <span class="tbl">center<span class="s">센터 격리</span></span>
+      <span class="tbl">user<span class="s">역할 3종</span></span>
+      <span class="tbl">session<span class="s">유휴·폐기</span></span>
+      <span class="tbl">invite<span class="s">1회용</span></span>
+      <span class="tbl">child<span class="s">별칭·동의</span></span>
+    </div>
+    <div class="tables">
+      <span class="tbl key">assignment<span class="s">start_date · end_date · revoked_at<br>멘토 권한의 유일한 근거</span></span>
+      <span class="tbl">record<span class="s">정정·숨김</span></span>
+      <span class="tbl">staff_note<span class="s">암호문·key_id<br>+공유 문구</span></span>
+      <span class="tbl">audit_log<span class="s">3년·추가 전용</span></span>
+    </div>
+    <div class="note">시드 데이터는 가상 센터·가상 아동만 사용 (실제 아동 정보 없음)</div>
+  </div>
+</div>
+
+<div class="bottom"><b>개발·검증 (런타임 외)</b> · pytest 권한 매트릭스·날짜 경계 테스트 · bandit · Semgrep CE(팀 작성 인가 규칙) · Docker Compose(Caddy·앱·DB)</div>
+
+</body>
+</html>

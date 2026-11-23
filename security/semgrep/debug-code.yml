@@ -1,0 +1,76 @@
+# Custom Semgrep rules for Ieogagi: leftover debug code family.
+# KISA category: encapsulation (debug code that was not removed).
+# Rules: print/pprint/breakpoint, "__main__" blocks, debug or reload mode switches.
+# Tests: tests/debug-code.py
+rules:
+  - id: ieogagi-no-print
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [제거되지 않고 남은 디버그 코드] print()/pprint()/breakpoint()/pdb.set_trace() 를 남기지 마세요.
+      로그는 구조화 로거(logging)로, 마스킹 규칙을 거쳐 남기세요.
+      / Do not leave print(), pprint(), breakpoint() or pdb.set_trace() in the code.
+      Use the structured logger (logging) so masking rules apply.
+    metadata:
+      kisa-category: 캡슐화
+      kisa-item: 제거되지 않고 남은 디버그 코드
+      cwe:
+        - "CWE-489: Active Debug Code"
+      confidence: HIGH
+    pattern-either:
+      - pattern: print(...)
+      - pattern: pprint(...)
+      - pattern: pprint.pprint(...)
+      - pattern: pprint.pp(...)
+      - pattern: breakpoint()
+      - pattern: pdb.set_trace()
+      - pattern: ipdb.set_trace()
+      - pattern: pdb.post_mortem(...)
+
+  - id: ieogagi-no-main-block
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [제거되지 않고 남은 디버그 코드] if __name__ == "__main__": 블록을 두지 마세요.
+      실행 진입점은 pyproject.toml 의 console_scripts 로 제공하세요.
+      / Do not keep an `if __name__ == "__main__":` block (typically leftover test or debug code).
+      Expose entry points through console_scripts in pyproject.toml instead.
+    metadata:
+      kisa-category: 캡슐화
+      kisa-item: 제거되지 않고 남은 디버그 코드
+      cwe:
+        - "CWE-489: Active Debug Code"
+      confidence: HIGH
+    pattern-either:
+      - pattern: |
+          if __name__ == "__main__":
+              ...
+      - pattern: |
+          if "__main__" == __name__:
+              ...
+
+  - id: ieogagi-no-debug-mode
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [제거되지 않고 남은 디버그 코드] 앱 코드에서 debug=True, reload=True, DEBUG 로그 레벨 고정을 쓰지 마세요.
+      개발용 reload 는 실행 명령(CLI 옵션)으로만 켜고, 로그 레벨은 설정값으로 주입하세요.
+      / Do not hard-code debug=True, reload=True or the DEBUG log level in app code.
+      Enable reload only through the dev command line and inject the log level from settings.
+    metadata:
+      kisa-category: 캡슐화
+      kisa-item: 제거되지 않고 남은 디버그 코드
+      cwe:
+        - "CWE-489: Active Debug Code"
+        - "CWE-215: Insertion of Sensitive Information Into Debugging Code"
+      confidence: HIGH
+    pattern-either:
+      - pattern: FastAPI(..., debug=True, ...)
+      - pattern: Starlette(..., debug=True, ...)
+      - pattern: $APP.debug = True
+      - pattern: uvicorn.run(..., reload=True, ...)
+      - pattern: uvicorn.run(..., debug=True, ...)
+      - pattern: logging.basicConfig(..., level=logging.DEBUG, ...)
+      - pattern: logging.basicConfig(..., level="DEBUG", ...)
+      - pattern: $LOGGER.setLevel(logging.DEBUG)
+      - pattern: $LOGGER.setLevel("DEBUG")

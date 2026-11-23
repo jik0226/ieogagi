@@ -1,0 +1,195 @@
+/* ---------- W2: greeting block ----------
+   On a phone it continues the brown header band; on a wide screen it is a
+   rounded card in the 480px column. Nothing in it is focusable. */
+.mentor-hero {
+  position: relative;
+  min-height: 9.5rem;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  overflow: hidden;
+  background: var(--color-primary);
+  border-radius: var(--radius-xl) var(--radius-xl) var(--radius-md) 3.5rem;
+  color: var(--color-on-primary);
+}
+
+.mentor-hero p {
+  position: relative;
+  margin: 0;
+}
+
+.mentor-hero__hello {
+  font-size: 1.25rem;
+}
+
+.mentor-hero__name {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: var(--line-height-tight);
+}
+
+.mentor-hero__where {
+  margin-top: var(--space-1) !important;
+  font-size: var(--font-size-sm);
+}
+
+.mentor-hero::before,
+.mentor-hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mentor-hero::before {
+  right: -60px;
+  bottom: -60px;
+  width: 136px;
+  height: 136px;
+  border: 20px solid var(--color-surface);
+}
+
+.mentor-hero::after {
+  top: 6px;
+  right: 46px;
+  width: 60px;
+  height: 60px;
+  background: var(--color-butter);
+  box-shadow: -56px 40px 0 -12px var(--color-sage);
+}
+
+@media (max-width: 480px) {
+  .app-header--mentor:has(+ .page .mentor-hero) {
+    border-radius: 0;
+  }
+
+  .app-header--mentor:has(+ .page .mentor-hero) .app-header__who {
+    display: none;
+  }
+
+  .page--mentor .mentor-hero {
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-4)) 0;
+    padding: var(--space-5) var(--space-5) var(--space-6);
+    border-radius: 0 0 var(--radius-md) 3.5rem;
+  }
+}
+
+/* ---------- W2: child rows (colour tile + white card + chevron) ---------- */
+.card.assignment-card {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+.assignment-card__tile {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1.25rem;
+  background: var(--color-peach);
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+}
+
+.card-list > li:nth-child(3n + 2) .assignment-card__tile {
+  background: var(--color-sage);
+}
+
+.card-list > li:nth-child(3n) .assignment-card__tile {
+  background: var(--color-butter);
+}
+
+.card--upcoming .assignment-card__tile {
+  background: var(--color-surface-dimmed);
+  color: var(--color-text-muted);
+}
+
+.assignment-card__body {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) 2.5rem var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.card--upcoming .assignment-card__body {
+  padding-right: var(--space-4);
+  background: var(--color-surface-dimmed);
+  border: 1.5px dashed var(--color-border-strong);
+  box-shadow: none;
+}
+
+.assignment-card__head .badge {
+  background: var(--color-surface);
+}
+
+.assignment-card__note {
+  font-size: var(--font-size-sm);
+}
+
+.card--upcoming .assignment-card__head + .meta + p {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.assignment-card__chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.card-link:hover .assignment-card__body {
+  box-shadow: var(--shadow-raised);
+}
+
+.card-link:active .assignment-card__body {
+  background: var(--color-row-hover);
+}
+
+.assignment-card__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Share of the assignment period that has passed. The same number is
+   written next to it, so the bar is never the only carrier of meaning. */
+.period-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  appearance: none;
+}
+
+.period-bar::-webkit-progress-bar {
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-pill);
+}
+
+.period-bar::-webkit-progress-value {
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+}
+
+.period-bar::-moz-progress-bar {
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+}

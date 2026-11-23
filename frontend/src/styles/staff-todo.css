@@ -1,0 +1,100 @@
+/* ---------- "확인이 필요한 항목" tiles ----------
+   Each tile is one button: icon tile + label + count + where to go. The
+   count is text, so the colour of the tile carries no meaning by itself. */
+.staff-todo {
+  margin-bottom: var(--space-5);
+}
+
+.staff-todo__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-lg);
+}
+
+.staff-todo__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.staff-todo__tile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 6.5rem;
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.staff-todo__tile:hover {
+  box-shadow: 0 4px 10px rgba(43, 29, 24, 0.08), 0 12px 28px rgba(43, 29, 24, 0.12);
+}
+
+.staff-todo__tile:active {
+  transform: scale(0.98);
+}
+
+.staff-todo__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1.125rem;
+  color: var(--color-primary);
+}
+
+.staff-todo__tile--peach .staff-todo__icon {
+  background: var(--color-peach);
+}
+
+.staff-todo__tile--butter .staff-todo__icon {
+  background: var(--color-butter);
+}
+
+.staff-todo__body {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.staff-todo__label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.staff-todo__count {
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.staff-todo__count small {
+  margin-left: 0.125rem;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+}
+
+.staff-todo__hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 899px) {
+  .staff-todo__list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+}

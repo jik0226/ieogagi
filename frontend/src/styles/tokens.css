@@ -1,0 +1,111 @@
+/* Design tokens. Restyle the app by editing these values first.
+   Theme "따뜻한 수첩" (design review B, 2026-10-27): cream page, dark brown
+   primary, pastel peach / sage / butter surfaces, pill buttons, round cards.
+
+   Contrast (WCAG 2.x, measured with the values below):
+   - body text 16.3:1 on white, 14.7:1 on the page background
+   - muted text 6.6:1 on white, 5.9:1 on the page background and 5.1:1 or
+     better on every tinted surface it sits on (surface-muted, row hover,
+     status softs, accent-soft, surface-dimmed)
+   - primary text 12.5:1 on white, 10.5:1 on primary-soft, 10.7:1 on
+     surface-muted; white on primary 12.5:1, on hover 14.7:1, on active 16.7:1
+   - danger text 6.5:1 on white, 5.6:1 on danger-soft; white on danger 6.5:1
+   - status text on its own soft background: success 5.2, warning 5.8, info 6.1
+   - UI borders (inputs, buttons: border-strong) 4.5:1 on white, 3.8:1 on
+     surface-muted, 3.5:1 on surface-dimmed; the focus ring 6.4:1 on white,
+     5.8:1 on the page background (it is never drawn on the brown hero)
+   - --color-accent (poster yellow, 1.7:1) is decoration only: a bar beside
+     text that already has its own label. Never text, never a control border.
+   - --color-peach / --color-sage / --color-butter are card and tile fills
+     only; text on them uses --color-text or --color-text-muted (5.1:1+).
+   - --color-border / --color-border-subtle only separate rows and frame
+     cards; no control relies on them to be seen. */
+:root {
+  /* Brand */
+  --color-primary: #4a2c25;
+  --color-primary-hover: #3b221c;
+  --color-primary-active: #2c1914;
+  --color-primary-soft: #f6e9e0;
+  --color-on-primary: #ffffff;
+  --color-accent: #f2c14e;
+  --color-accent-soft: #fdf5dc;
+  --color-peach: #fce3c7;
+  --color-sage: #e3ecd3;
+  --color-butter: #fdebb5;
+
+  /* Neutral */
+  --color-bg: #f7f3ee;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1ece6;
+  --color-surface-dimmed: #eae3da;
+  --color-row-hover: #f9f5f0;
+  --color-border: #e2d8cc;
+  --color-border-subtle: #eee8e1;
+  --color-border-strong: #857467;
+  --color-text: #2b1d18;
+  --color-text-muted: #6b5a50;
+  --color-backdrop: rgba(43, 29, 24, 0.55);
+
+  /* Status */
+  --color-danger: #b3233f;
+  --color-danger-hover: #8f1c33;
+  --color-danger-active: #731629;
+  --color-danger-soft: #fce9ec;
+  --color-warning: #7a5a00;
+  --color-warning-soft: #fff3d6;
+  --color-success: #3d6b2a;
+  --color-success-soft: #e3ecd3;
+  --color-info: #2f5a8a;
+  --color-info-soft: #e6eef9;
+
+  /* Focus: a solid outline, never only a faint glow */
+  --color-focus: #0b57d0;
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+
+  /* Typography (system fonts only; nothing is downloaded) */
+  --font-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.75rem;
+  --line-height: 1.65;
+  --line-height-tight: 1.35;
+  --letter-spacing-tight: -0.01em;
+
+  /* Spacing scale (4px / 8px rhythm) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Touch targets: 44px for phone screens, 36px for dense desktop tables */
+  --tap-min: 44px;
+  --tap-compact: 36px;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(43, 29, 24, 0.05), 0 2px 8px rgba(43, 29, 24, 0.05);
+  --shadow-raised: 0 2px 4px rgba(43, 29, 24, 0.06), 0 8px 20px rgba(43, 29, 24, 0.09);
+  --shadow-dialog: 0 -4px 32px rgba(43, 29, 24, 0.22);
+
+  /* Motion: short and subtle; base.css turns it off for reduced motion */
+  --transition-fast: 120ms ease-out;
+
+  /* Layout: mentor screens are phone-first, staff screens are PC-first */
+  --content-width-mentor: 480px;
+  --content-width-staff: 1180px;
+  --content-width-narrow: 480px;
+
+  /* Fixed bottom button on mentor screens: 44px button with a gap on both sides */
+  --sticky-bar-height: calc(var(--tap-min) + 2 * var(--space-4));
+}

@@ -1,0 +1,216 @@
+# Custom Semgrep rules for Ieogagi: error handling family.
+# KISA category: error handling.
+# Rules: broad except, empty except, exception text/traceback leaking into responses.
+# Tests: tests/error-handling.py
+rules:
+  - id: ieogagi-no-broad-except
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [부적절한 예외 처리] except Exception / except BaseException / 맨몸 except: 를 쓰지 마세요.
+      처리 가능한 구체적 예외(ValueError, SQLAlchemyError 등)만 잡으세요.
+      / Do not use "except Exception", "except BaseException" or a bare "except:".
+      Catch only the specific exceptions you can actually handle.
+    metadata:
+      kisa-category: 에러처리
+      kisa-item: 부적절한 예외 처리
+      cwe:
+        - "CWE-396: Declaration of Catch for Generic Exception"
+        - "CWE-755: Improper Handling of Exceptional Conditions"
+      confidence: HIGH
+    pattern-either:
+      - patterns:
+          - pattern-either:
+              - pattern: |
+                  try:
+                      ...
+                  except $X:
+                      ...
+              - pattern: |
+                  try:
+                      ...
+                  except $X as $E:
+                      ...
+          - metavariable-regex:
+              metavariable: $X
+              regex: ^(builtins\.)?(Exception|BaseException)$
+      - pattern: |
+          try:
+              ...
+          except:
+              ...
+      - pattern: |
+          try:
+              ...
+          except (..., Exception, ...):
+              ...
+      - pattern: |
+          try:
+              ...
+          except (..., Exception, ...) as $E:
+              ...
+      - pattern: |
+          try:
+              ...
+          except (..., BaseException, ...):
+              ...
+      - pattern: |
+          try:
+              ...
+          except (..., BaseException, ...) as $E:
+              ...
+
+  - id: ieogagi-no-empty-except
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [오류 상황 대응 부재] except 블록이 pass / ... / continue 뿐입니다. 오류를 삼키지 마세요.
+      로그를 남기고 복구하거나, 호출자에게 의미 있는 오류로 다시 던지세요.
+      / The except block only contains pass, ... or continue, so the error is swallowed.
+      Log it and recover, or re-raise it as a meaningful application error.
+    metadata:
+      kisa-category: 에러처리
+      kisa-item: 오류 상황 대응 부재
+      cwe:
+        - "CWE-390: Detection of Error Condition Without Action"
+      confidence: HIGH
+    pattern-either:
+      - pattern: |
+          try:
+              ...
+          except $X:
+              pass
+      - pattern: |
+          try:
+              ...
+          except $X as $E:
+              pass
+      - pattern: |
+          try:
+              ...
+          except:
+              pass
+      - pattern: |
+          try:
+              ...
+          except $X:
+              continue
+      - pattern: |
+          try:
+              ...
+          except $X as $E:
+              continue
+      - pattern: |
+          try:
+              ...
+          except:
+              continue
+      # A literal Ellipsis body cannot be written as a Semgrep pattern, so use a regex for it.
+      - pattern-regex: (?m)^[ \t]*except\b[^\n#]*:[ \t]*(\n[ \t]*)?\.\.\.[ \t]*(\#.*)?$
+
+  - id: ieogagi-no-exception-leak
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [오류 메시지 정보 노출] 예외 문구나 traceback 을 응답/반환값에 담지 마세요.
+      클라이언트에는 {error:{code,message}} 형태의 일반 메시지만 주고, 상세 내용은 마스킹한 서버 로그에만 남기세요.
+      / Do not put exception text or a traceback into a response or return value.
+      Return a generic {error:{code,message}} to the client and log details server-side only.
+    metadata:
+      kisa-category: 에러처리
+      kisa-item: 오류 메시지 정보 노출
+      cwe:
+        - "CWE-209: Generation of Error Message Containing Sensitive Information"
+        - "CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere"
+      confidence: HIGH
+    pattern-either:
+      # Tracebacks are banned everywhere in app code; use logger.exception() with masking instead.
+      - pattern: traceback.format_exc(...)
+      - pattern: traceback.print_exc(...)
+      - pattern: traceback.print_exception(...)
+      - pattern: traceback.format_exception(...)
+      - pattern: traceback.print_stack(...)
+      - pattern: traceback.format_stack(...)
+      # Case 1: inside "except ... as e:" the exception text flows into an HTTPException or a returned response.
+      # ("return $V" also covers return JSONResponse(...) so each finding is reported once.)
+      - patterns:
+          - pattern-inside: |
+              try:
+                  ...
+              except $X as $E:
+                  ...
+          - pattern-either:
+              - pattern: raise HTTPException(..., detail=$V, ...)
+              - pattern: return $V
+          - metavariable-pattern:
+              metavariable: $V
+              pattern-either:
+                - pattern: <... str($E) ...>
+                - pattern: <... repr($E) ...>
+                - pattern: <... f"...{$E}..." ...>
+                - pattern: <... $E.args ...>
+                - pattern: <... $E.__str__() ...>
+      # Case 2: an exception handler function (parameter typed *Exception / *Error) echoes the exception.
+      - patterns:
+          - pattern-inside: |
+              def $F(..., $E: $T, ...):
+                  ...
+          - metavariable-regex:
+              metavariable: $T
+              regex: .*(Exception|Error)$
+          - pattern-either:
+              - pattern: raise HTTPException(..., detail=$V, ...)
+              - pattern: return $V
+          - metavariable-pattern:
+              metavariable: $V
+              pattern-either:
+                - pattern: <... str($E) ...>
+                - pattern: <... repr($E) ...>
+                - pattern: <... f"...{$E}..." ...>
+                - pattern: <... $E.args ...>
+                - pattern: <... $E.__str__() ...>
+                - pattern: <... $E.errors() ...>
+      # Case 3: the exception text is first stored in a local variable inside "except ... as e:" and the variable
+      # is returned or put into an HTTPException afterwards (in the handler or later in the same block).
+      - patterns:
+          - pattern-inside: |
+              try:
+                  ...
+              except $X as $E:
+                  ...
+                  $M = $VAL
+                  ...
+              ...
+          - pattern-either:
+              - pattern: raise HTTPException(..., detail=<... $M ...>, ...)
+              - pattern: return <... $M ...>
+          - metavariable-pattern:
+              metavariable: $VAL
+              pattern-either:
+                - pattern: <... str($E) ...>
+                - pattern: <... repr($E) ...>
+                - pattern: <... f"...{$E}..." ...>
+                - pattern: <... $E.args ...>
+                - pattern: <... $E.__str__() ...>
+      # Case 4: the same through a local variable inside an exception handler function (parameter typed *Exception / *Error).
+      - patterns:
+          - pattern-inside: |
+              def $F(..., $E: $T, ...):
+                  ...
+                  $M = $VAL
+                  ...
+          - metavariable-regex:
+              metavariable: $T
+              regex: .*(Exception|Error)$
+          - pattern-either:
+              - pattern: raise HTTPException(..., detail=<... $M ...>, ...)
+              - pattern: return <... $M ...>
+          - metavariable-pattern:
+              metavariable: $VAL
+              pattern-either:
+                - pattern: <... str($E) ...>
+                - pattern: <... repr($E) ...>
+                - pattern: <... f"...{$E}..." ...>
+                - pattern: <... $E.args ...>
+                - pattern: <... $E.__str__() ...>
+                - pattern: <... $E.errors() ...>

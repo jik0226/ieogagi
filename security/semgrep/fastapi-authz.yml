@@ -1,0 +1,75 @@
+# Custom Semgrep rule: every FastAPI route must declare an authorization dependency.
+# KISA category: security features (적절한 인증 없는 중요 기능 허용 / 부적절한 인가).
+# Allowed: a parameter typed with one of the app/authz/deps.py aliases, or an explicit
+# public marker `dependencies=[Depends(public_endpoint)]` for login/signup/health.
+# Both def and async def routes are matched (Semgrep treats async def as def); WebSocket routes included.
+# Tests: tests/fastapi-authz.py
+rules:
+  - id: ieogagi-route-missing-authz
+    languages: [python]
+    severity: ERROR
+    message: >-
+      [부적절한 인가] 라우트 함수에 인가 의존성이 없습니다. CurrentUser·StaffUser·DirectorUser·
+      MentorUser·*ChildAccess 중 하나를 매개변수 타입으로 선언하거나, 의도적으로 공개하는
+      경로라면 dependencies=[Depends(public_endpoint)]를 붙이세요.
+      / Route has no authorization dependency. Declare one of the app/authz/deps.py
+      aliases as a parameter type, or mark it public with dependencies=[Depends(public_endpoint)].
+    metadata:
+      kisa-category: 보안기능
+      kisa-item: 적절한 인증 없는 중요 기능 허용, 부적절한 인가
+      cwe:
+        - "CWE-306: Missing Authentication for Critical Function"
+        - "CWE-862: Missing Authorization"
+      confidence: HIGH
+    patterns:
+      - pattern: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(...):
+              ...
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: ^(get|post|put|patch|delete|head|options|trace|websocket|api_route)$
+      - pattern-not: |
+          @$ROUTER.$METHOD(..., dependencies=[..., Depends(public_endpoint), ...], ...)
+          def $FUNC(...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: CurrentUser, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: StaffUser, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: DirectorUser, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: MentorUser, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: MentorChildAccess, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: MentorChildWriteAccess, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: StaffChildAccess, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: StaffChildWriteAccess, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: DirectorChildAccess, ...):
+              ...
+      - pattern-not: |
+          @$ROUTER.$METHOD(...)
+          def $FUNC(..., $PARAM: ChildReadAccess, ...):
+              ...

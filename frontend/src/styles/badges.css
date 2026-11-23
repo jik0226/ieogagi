@@ -1,0 +1,93 @@
+/* ---------- Badges: pill shape, always carry text, never colour alone ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Status badges lead with a small dot in the text colour (decoration). */
+.badge--success::before,
+.badge--warning::before,
+.badge--danger::before,
+.badge--info::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge--success {
+  background: var(--color-success-soft);
+  border-color: transparent;
+  color: var(--color-success);
+}
+
+.badge--warning {
+  background: var(--color-warning-soft);
+  border-color: transparent;
+  color: var(--color-warning);
+}
+
+.badge--danger {
+  background: var(--color-danger-soft);
+  border-color: transparent;
+  color: var(--color-danger);
+}
+
+.badge--info {
+  background: var(--color-info-soft);
+  border-color: transparent;
+  color: var(--color-info);
+}
+
+/* Director-only padlock, drawn in CSS (shackle + body) instead of an emoji. */
+.badge--lock {
+  position: relative;
+  padding-left: 1.625rem;
+}
+
+.badge--lock::before,
+.badge--lock::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+}
+
+.badge--lock::before {
+  left: 10px;
+  width: 8px;
+  height: 7px;
+  margin-top: -7px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.badge--lock::after {
+  left: 9px;
+  width: 10px;
+  height: 8px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+/* Days left on an active assignment ("D-54"): butter pill, dark text 13.7:1. */
+.badge--dday {
+  background: var(--color-butter);
+  border-color: transparent;
+  color: var(--color-text);
+}

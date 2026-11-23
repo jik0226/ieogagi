@@ -1,0 +1,240 @@
+/* ---------- Summary line above the table ---------- */
+.audit-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.audit-summary__total {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.audit-summary__total strong {
+  margin-right: 2px;
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+}
+
+.audit-summary__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.audit-summary__chip--danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+/* ---------- Table ---------- */
+.audit-table tbody td {
+  height: 4.25rem;
+}
+
+/* Day header: a butter pill on its own row. */
+.audit-table tbody tr.audit-day > th {
+  height: auto;
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  background: var(--color-surface);
+  border-bottom: 0;
+}
+
+.audit-table tbody tr.audit-day:hover > th {
+  background: var(--color-surface);
+}
+
+.audit-day__label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0 var(--space-3);
+  background: var(--color-butter);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.audit-time {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Denied / failed rows: red edge on the left as well as the tint. */
+.audit-table tr.is-denied > :first-child {
+  box-shadow: inset 4px 0 0 var(--color-danger);
+}
+
+.audit-actor,
+.audit-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.audit-actor__text,
+.audit-action__text {
+  display: grid;
+  line-height: var(--line-height-tight);
+}
+
+.audit-avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  color: var(--color-primary);
+  font-weight: 800;
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+.audit-avatar--peach {
+  background: var(--color-peach);
+}
+
+.audit-avatar--sage {
+  background: var(--color-sage);
+}
+
+.audit-avatar--butter {
+  background: var(--color-butter);
+}
+
+.audit-actor__name,
+.audit-action__label {
+  font-weight: 700;
+}
+
+.audit-actor__id,
+.audit-action__code {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.audit-action__tile {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+}
+
+.audit-action__icon {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.audit-action__tile--enter {
+  background: var(--color-sage);
+}
+
+.audit-action__tile--doc {
+  background: var(--color-peach);
+}
+
+.audit-action__tile--people {
+  background: var(--color-butter);
+}
+
+.audit-action__tile--eye {
+  background: var(--color-primary-soft);
+}
+
+.audit-action__tile--stop {
+  background: var(--color-surface);
+  color: var(--color-danger);
+}
+
+.audit-ip {
+  color: var(--color-text-muted);
+}
+
+.audit-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.audit-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  word-break: break-all;
+}
+
+.audit-chip__key {
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+/* ---------- Pager ---------- */
+.audit-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.audit-pager__where {
+  min-width: 6rem;
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-card);
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 767px) {
+  .audit-filter {
+    padding: var(--space-5);
+  }
+
+  .audit-filter__head {
+    padding-right: 0;
+  }
+
+  .audit-filter::after {
+    right: 20px;
+  }
+
+  .audit-filter__row > .field,
+  .audit-filter__period {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .audit-filter .field select,
+  .audit-filter .field input[type="date"] {
+    padding-inline: var(--space-3);
+  }
+
+  .audit-filter__row .filter-row__buttons {
+    width: 100%;
+  }
+
+  .audit-filter__row .filter-row__buttons .btn {
+    flex: 1 1 auto;
+  }
+}

@@ -1,0 +1,77 @@
+/* "＋ 오늘 기록 쓰기" and the record "저장" stay at the bottom of the
+   screen while scrolling, inside the 480px mentor column. They are fixed, so
+   they take no room in the page: --sticky-bar-height (button + the gap around
+   it, from tokens.css) plus a gap is added under the last element, and
+   scrolling a focused field into view leaves the same strip clear. */
+.page--mentor:has(.btn[href$="/records/new"]),
+.page--mentor:has(.record-form) {
+  padding-bottom: calc(var(--sticky-bar-height) + var(--space-5));
+}
+
+html:has(.record-form) {
+  scroll-padding-bottom: var(--sticky-bar-height);
+}
+
+.page--mentor .btn--primary[href$="/records/new"],
+.page--mentor .record-form .btn--primary[type="submit"] {
+  position: fixed;
+  z-index: 10;
+  bottom: var(--space-4);
+  left: 50%;
+  width: calc(min(var(--content-width-mentor), 100vw) - 2 * var(--space-4));
+  margin: 0;
+  box-shadow: var(--shadow-raised);
+  transform: translateX(-50%);
+}
+
+.page--mentor .btn--primary[href$="/records/new"]:active,
+.page--mentor .record-form .btn--primary[type="submit"]:active:not(:disabled) {
+  transform: translateX(-50%) scale(0.98);
+}
+
+/* ---------- W4: record form as a notebook page ---------- */
+.record-form {
+  position: relative;
+  border-color: var(--color-surface-muted);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-raised);
+}
+
+/* The date is a normal labelled field (label and the allowed range are
+   visible): past dates inside the assignment period can be chosen too. */
+.record-form .field input[name="session_date"] {
+  font-weight: 700;
+}
+
+/* Lined-paper fields: only a bottom line (4.5:1). */
+.record-form .field textarea {
+  min-height: 4.5rem;
+  padding-left: 0;
+  padding-right: 0;
+  background: transparent;
+  border-width: 0 0 1.5px;
+  border-radius: 0;
+}
+
+.record-form .field--invalid textarea {
+  border-width: 0 0 2px;
+}
+
+/* "다음에 할 것" label as a peach pill: it is what the next teacher reads first. */
+.record-form .field:has(textarea[name="next_step"]) label {
+  padding: 0.125rem var(--space-3);
+  background: var(--color-peach);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+}
+
+/* Notice at the top of the form: butter box with a brown bar. Text and the
+   bar use the body/primary colours (14:1 or better on butter). */
+.record-form__note {
+  margin: 0;
+  background: var(--color-butter);
+  border: 1px solid var(--color-primary);
+  border-left-width: 6px;
+  color: var(--color-text);
+  font-weight: 700;
+}

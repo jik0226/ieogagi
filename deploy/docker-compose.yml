@@ -1,0 +1,146 @@
+# Production-like deployment on one server: Caddy (HTTPS, SPA) -> FastAPI -> PostgreSQL.
+# Secrets are files under deploy/secrets/ (git-ignored), mounted as Docker secrets.
+# Generate them with:
+#   backend/.venv/bin/ieogagi-dev-secrets --dir deploy/secrets --db-host db --group-readable
+# Without swarm, Compose bind-mounts each secret file with its host owner and mode (the
+# long-syntax uid/gid/mode are ignored), so the files are 0640 in a 0700 directory and
+# every service that runs as another uid gets the operator's group (IEOGAGI_SECRETS_GID).
+name: ieogagi
+
+x-secrets-group: &secrets-group ["${IEOGAGI_SECRETS_GID:?set IEOGAGI_SECRETS_GID in deploy/.env}"]
+
+# Container logs rotate by size (10 MB x 5 files per container) instead of growing forever.
+# Retention decision 2026-10-13: server logs are for troubleshooting only; the audit log
+# (kept 3 years in the DB) is the access record.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  db:
+    image: postgres:17-alpine
+    # Runs as postgres from the start (never root), so db-init keeps the secrets group;
+    # the entrypoint's own switch to postgres would drop supplementary groups.
+    user: postgres
+    group_add: *secrets-group
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_admin_password
+    secrets: [pg_admin_password, owner_password, app_password]
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ieogagi"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+    logging: *default-logging
+
+  # One-shot schema migration as the owner role; the app itself never gets owner rights.
+  migrate:
+    build: ../backend
+    command: ["alembic", "upgrade", "head"]
+    group_add: *secrets-group
+    environment:
+      IEOGAGI_ENV: production
+      IEOGAGI_OWNER_DATABASE_URL_FILE: /run/secrets/owner_database_url
+    secrets: [owner_database_url]
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [backend]
+    restart: "no"
+    logging: *default-logging
+
+  # Operator commands (add a center, seed demo data). Not started by `up`. Run it as your
+  # own user so the invite code file is readable only by you (see deploy/README.md):
+  #   docker compose --profile tools run --rm --user "$(id -u):$(id -g)" admin ieogagi-add-center "센터 이름"
+  # Its stdout goes to the container log, so it prints only event names and ids; the
+  # director invite code is written to deploy/secrets/invites/ as a 0600 file instead.
+  admin:
+    build: ../backend
+    profiles: [tools]
+    command: ["ieogagi-add-center", "--help"]
+    environment:
+      IEOGAGI_ENV: production
+      IEOGAGI_OWNER_DATABASE_URL_FILE: /run/secrets/owner_database_url
+      IEOGAGI_DATABASE_URL_FILE: /run/secrets/owner_database_url
+      IEOGAGI_SESSION_KEY_FILE: /run/secrets/session_key
+      IEOGAGI_NOTE_KEYRING_FILE: /run/secrets/note_keyring
+      IEOGAGI_INVITE_CODE_DIR: /run/ieogagi-invites
+    secrets: [owner_database_url, session_key, note_keyring]
+    volumes:
+      # Created beforehand with mode 700 (install -d -m 700 deploy/secrets/invites);
+      # the command refuses a directory owned by someone else or writable by others.
+      - type: bind
+        source: ./secrets/invites
+        target: /run/ieogagi-invites
+        bind: { create_host_path: false }
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    networks: [backend]
+    restart: "no"
+    logging: *default-logging
+
+  app:
+    build: ../backend
+    group_add: *secrets-group
+    environment:
+      IEOGAGI_ENV: production
+      IEOGAGI_ALLOWED_ORIGINS: '["https://${IEOGAGI_DOMAIN:?set IEOGAGI_DOMAIN in deploy/.env}"]'
+      IEOGAGI_DATABASE_URL_FILE: /run/secrets/database_url
+      IEOGAGI_SESSION_KEY_FILE: /run/secrets/session_key
+      IEOGAGI_NOTE_KEYRING_FILE: /run/secrets/note_keyring
+    secrets: [database_url, session_key, note_keyring]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    networks: [backend]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    logging: *default-logging
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    environment:
+      IEOGAGI_DOMAIN: ${IEOGAGI_DOMAIN}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [app]
+    networks:
+      edge: {}
+      backend:
+        ipv4_address: 172.28.0.10  # the only address uvicorn trusts for X-Forwarded-For
+    restart: unless-stopped
+    logging: *default-logging
+
+networks:
+  # No route to the internet from the app or database (no outbound calls at runtime).
+  backend:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+  edge: {}
+
+secrets:
+  pg_admin_password: { file: ./secrets/pg_admin_password }
+  owner_password: { file: ./secrets/owner_password }
+  app_password: { file: ./secrets/app_password }
+  owner_database_url: { file: ./secrets/owner_database_url }
+  database_url: { file: ./secrets/database_url }
+  session_key: { file: ./secrets/session_key }
+  note_keyring: { file: ./secrets/note_keyring }
+
+volumes:
+  db-data: {}
+  caddy-data: {}
+  caddy-config: {}
